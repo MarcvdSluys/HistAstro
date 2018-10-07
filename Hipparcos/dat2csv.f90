@@ -45,8 +45,9 @@ subroutine convert(totLines)
   write(*,'(A)') 'Converting '//trim(inFile)//' to '//trim(outFile)//'...'
   
   ! Add an explanatory header to the output file:
-  write(op,'(A6,",", A6,",", 2(A14,","), 2(A9,","), 4(A7,","))') '# Hip', 'mag', 'RA','Dec', 'pmRA','pmDec', &
-       'ErRA','ErDec','ErPa','ErPd'
+  !write(op,'(A6,",", A6,",", 2(A14,","), 2(A9,","), 4(A7,","))') &
+  write(op,'(A6,",", A6,",", 2(A14,","), 2(A9,","), 3(A7,","),A7)') &  ! No final comma
+       '# Hip', 'mag', 'RA','Dec', 'pmRA','pmDec', 'ErRA','ErDec','ErPa','ErPd'
   
   ! Process file header:
   do ln=1,1
@@ -66,7 +67,8 @@ subroutine convert(totLines)
         stop
      end if
      
-     write(op,'(I6,",", F6.2,",", 2(F14.10,","), 2(F9.2,","), 4(F7.2,","))') iDat, dat
+     !write(op,'(I6,",", F6.2,",", 2(F14.10,","), 2(F9.2,","), 4(F7.2,","))') iDat, dat
+     write(op,'(I6,",", F6.2,",", 2(F14.10,","), 2(F9.2,","), 3(F7.2,","),F7.2)') iDat, dat  ! No final comma
   end do  ! ln
   
   close(ip)
