@@ -1,7 +1,18 @@
 #!/bin/env python3
 
-import numpy as np
+# Modules:
 import math
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants:
+pi    = math.pi
+pi2   = 2*pi
+r2d   = math.degrees(1)  # Radians to degrees
+#r2h  = r2d/15
+d2r   = 1.0/r2d          # Degrees to radians
+mas2r = d2r/3.6e6      # Milliarcseconds to radians
+h2r   = d2r*15          # Hours to radians
 
 def eq2ecl(ra,dec, eps):
     lon = np.arctan2( np.sin(ra)  * np.cos(eps) + np.tan(dec) * np.sin(eps),  np.cos(ra) )
@@ -14,19 +25,11 @@ def par2horiz(ha,dec, phi):
     return az,alt
 
     
-
+# Time the execution:
 import time
 t0 = time.perf_counter() 
 
 xkcd = False
-
-pi    = math.pi
-pi2   = 2*pi
-r2d   = math.degrees(1)  # Radians to degrees
-#r2h  = r2d/15
-d2r   = 1.0/r2d          # Degrees to radians
-mas2r = d2r/3.6e6      # Milliarcseconds to radians
-h2r   = d2r*15          # Hours to radians
 
 # Read the input file, skipping the first two lines:
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',')  # Works (old file, no text)
@@ -52,11 +55,10 @@ t2 = time.perf_counter()
 Mlim = 7.0  # Magnitude limit
 mag = hip[:,1]
 sizes = 30*(0.5 + (Mlim-mag)/3.0)**2     # Scale inversely with magnitude.  Square, since scatter() uses surface area
-#ra  = hip[:,2]*r2h                          # Right ascension (h)
-ra  = hip[:,2]#*r2d                           # Right ascension (deg)
-dec = hip[:,3]#*r2d                           # Declination
-pma = hip[:,4]*mas2r  # /3.6e6                # pmRA, mas/yr -> deg/yr
-pmd = hip[:,5]*mas2r  # /3.6e6                # pmDec, mas/yr -> deg/yr
+ra  = hip[:,2]                           # Right ascension (rad)
+dec = hip[:,3]                           # Declination (rad)
+pma = hip[:,4]*mas2r                     # pmRA, mas/yr -> rad/yr
+pmd = hip[:,5]*mas2r                     # pmDec, mas/yr -> rad/yr
 
 
 # Correct for proper motion:
@@ -67,13 +69,6 @@ dt = targetEpoche - startEpoche
 
 raOld  = ra  + pma*dt / np.cos(dec)
 decOld = dec + pmd*dt
-
-
-# Convert to ecliptical coordinates:
-#import astropy.coordinates as coord
-#import astropy.units as u
-#hip1 = coord.ICRS(ra=ra*u.degree, dec=dec*u.degree, pm_ra_cosdec=pma*u.degree/u.yr, pm_dec=pmd*u.degree/u.yr)
-#print(hip1)
 
 
 t4 = time.perf_counter() 
@@ -90,10 +85,9 @@ sel = np.logical_and(sel, dec < decMax)
 
 
 
-import matplotlib
+#import matplotlib
 #matplotlib.use('Agg')  # Agg backend doesn't need an X server and is ~5x faster
 
-import matplotlib.pyplot as plt
 
 
 # Plot equatorial:
@@ -101,7 +95,7 @@ if xkcd:
     plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
     plt.xkcd()  # Plot everything that follows in XKCD style
 
-plt.style.use('dark_background')
+#plt.style.use('dark_background')
 plt.figure(figsize=(10,7))                   # Set png size to 1000x700 (dpi=100)
 
 # Create a scatter plot:
@@ -128,7 +122,6 @@ plt.close()                                  # Close the plot
 t5 = time.perf_counter() 
 eps = 0.40931975  # For 2000 in rad
 lon,lat = eq2ecl(ra,dec, eps)
-t6 = time.perf_counter() 
 
 
 lonMinMax,latMinMax = eq2ecl([raMin,raMax,raMax,raMin,raMin],[decMin,decMin,decMax,decMax,decMin], eps)
@@ -160,10 +153,7 @@ plt.scatter(lon[sel]*r2d, lat[sel]*r2d, s=sizes[sel])
 plt.plot(lonMinMax*r2d, latMinMax*r2d, ':')
 
 
-#plt.xlim(24,0)                              # Flip the x-axis range when plotting the whole sky
-#plt.axis('equal')                            # Set axes to a 'square grid' by changing the x,y limits to match image size - should go before .axis([])
 plt.axis('scaled')                          # Set axes to a 'square grid' by moving the plot box inside the figure
-#plt.axis('square')                          # Set axes to a 'square grid' by moving the plot box inside the figure and setting xmax-xmin = ymax-ymin
 plt.axis([lonMax*r2d,lonMin*r2d, latMin*r2d,latMax*r2d])             # Select Aries (RA=26-50 deg, dec=10-30 deg)
 plt.xlabel(r'$\lambda_{2000}$ ($^\circ$)')           # Label the horizontal axis
 plt.ylabel(r'$\beta_{2000}$ ($^\circ$)')           # Label the vertical axis - use LaTeX for symbols
@@ -173,7 +163,8 @@ plt.savefig("hipparcos_ecliptic.png")                 # Save the plot as png
 #plt.show()                              # Show the plot to screen
 plt.close()                                  # Close the plot
 
-t7 = time.perf_counter()
+t6 = time.perf_counter()
+
 
 
 
@@ -207,10 +198,7 @@ sel = np.logical_and(sel, mag < Mlim)
 plt.scatter(az[sel]*r2d, alt[sel]*r2d, s=sizes[sel])
 
 
-#plt.xlim(24,0)                              # Flip the x-axis range when plotting the whole sky
-#plt.axis('equal')                            # Set axes to a 'square grid' by changing the x,y limits to match image size - should go before .axis([])
 plt.axis('scaled')                          # Set axes to a 'square grid' by moving the plot box inside the figure
-#plt.axis('square')                          # Set axes to a 'square grid' by moving the plot box inside the figure and setting xmax-xmin = ymax-ymin
 plt.axis([azMin*r2d,azMax*r2d, altMin*r2d,altMax*r2d])             # Select Aries (RA=26-50 deg, dec=10-30 deg)
 plt.xlabel(r'A ($^\circ$)')           # Label the horizontal axis
 plt.ylabel(r'h ($^\circ$)')           # Label the vertical axis - use LaTeX for symbols
@@ -220,7 +208,7 @@ plt.savefig("hipparcos_horizontal.png")                 # Save the plot as png
 #plt.show()                              # Show the plot to screen
 plt.close()                                  # Close the plot
 
-t8 = time.perf_counter()
+t7 = time.perf_counter()
 
 
 
@@ -241,8 +229,7 @@ print("Total run time:  %0.2f s" % (t9-t0))
 print("  read file:     %0.2f s" % (t2-t1))
 print("  pm:            %0.2f s" % (t4-t3))
 print("  plot eq:       %0.2f s" % (t5-t4))
-print("  eq2ecl:        %0.2f s" % (t6-t5))
-print("  plot ecl:      %0.2f s" % (t7-t6))
-print("  plot az:       %0.2f s" % (t8-t7))
+print("  plot ecl:      %0.2f s" % (t6-t5))
+print("  plot az:       %0.2f s" % (t7-t6))
 
 
