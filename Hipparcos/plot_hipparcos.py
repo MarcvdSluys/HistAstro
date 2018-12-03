@@ -34,12 +34,12 @@ xkcd = False
 # Read the input file, skipping the first two lines:
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',')  # Works (old file, no text)
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))  # Works (old file, no text)
-#hip = np.genfromtxt('newcombi.dat', skip_header=1, delimiter=',')  # WORKS, but text fields become nan
-#hip = np.genfromtxt('newcombi.dat', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
+#hip = np.genfromtxt('hipparcos.csv', skip_header=1, delimiter=',')  # WORKS, but text fields become nan
+#hip = np.genfromtxt('hipparcos.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
 
 t1 = time.perf_counter() 
-hip    = np.loadtxt('newcombi.dat', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers
-hiptxt = np.loadtxt('newcombi.dat', skiprows=2, delimiter=',', usecols=(10,11,12), dtype=np.str)  # Read the text columns
+hip    = np.loadtxt('hipparcos.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers
+hiptxt = np.loadtxt('hipparcos.csv', skiprows=2, delimiter=',', usecols=(10,11,12), dtype=np.str)  # Read the text columns
 t2 = time.perf_counter() 
 
 # Columns: 0: hip#, 1: vmag, 2: ra (rad), 3: dec (rad), 4: pmRA (mas/yr), 5: pmDec (mas/yr), 6: ErRA (?), 7:
