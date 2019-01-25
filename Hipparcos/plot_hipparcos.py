@@ -1,27 +1,27 @@
 #!/bin/env python3
 
 # Modules:
-import math
+import math as m
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Constants:
-pi    = math.pi
+pi    = m.pi
 pi2   = 2*pi
-r2d   = math.degrees(1)  # Radians to degrees
+r2d   = m.degrees(1)  # Radians to degrees
 #r2h  = r2d/15
 d2r   = 1.0/r2d          # Degrees to radians
 mas2r = d2r/3.6e6      # Milliarcseconds to radians
 h2r   = d2r*15          # Hours to radians
 
 def eq2ecl(ra,dec, eps):
-    lon = np.arctan2( np.sin(ra)  * np.cos(eps) + np.tan(dec) * np.sin(eps),  np.cos(ra) )
-    lat =  np.arcsin( np.sin(dec) * np.cos(eps) - np.cos(dec) * np.sin(eps) * np.sin(ra) )
+    lon = np.arctan2( np.sin(ra)  * m.cos(eps) + np.tan(dec) * m.sin(eps),  np.cos(ra) )
+    lat =  np.arcsin( np.sin(dec) * m.cos(eps) - np.cos(dec) * m.sin(eps) * np.sin(ra) )
     return lon,lat
 
 def par2horiz(ha,dec, phi):
-    az  = np.arctan2( np.sin(ha),   np.cos(ha) * np.sin(phi) - np.tan(dec) * np.cos(phi) ) % pi2
-    alt = np.arcsin(  np.sin(dec) * np.sin(phi) + np.cos(ha) * np.cos(dec) * np.cos(phi) )
+    az  = np.arctan2( np.sin(ha),   np.cos(ha) * m.sin(phi) - np.tan(dec) * m.cos(phi) ) % pi2
+    alt = np.arcsin(  np.sin(dec) * m.sin(phi) + np.cos(ha) * np.cos(dec) * m.cos(phi) )
     return az,alt
 
     
@@ -90,7 +90,7 @@ sel = np.logical_and(sel, dec < decMax)
 
 
 
-# Plot equatorial:
+# Plot equatorial map:
 if xkcd:
     plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
     plt.xkcd()  # Plot everything that follows in XKCD style
@@ -118,7 +118,7 @@ plt.close()                                  # Close the plot
 
 
 
-
+# Convert to ecliptic coordinates:
 t5 = time.perf_counter() 
 eps = 0.40931975  # For 2000 in rad
 lon,lat = eq2ecl(ra,dec, eps)
@@ -140,7 +140,7 @@ sel = np.logical_and(sel, lat < latMax)
 
 
 
-# Plot equatorial:
+# Plot ecliptic map:
 if xkcd:
     plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
     plt.xkcd()  # Plot everything that follows in XKCD style
@@ -168,7 +168,7 @@ t6 = time.perf_counter()
 
 
 
-# Horizontal map:
+# Plot horizontal map:
 phi = 51.178*d2r
 
 ha = -6*h2r - ra  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
