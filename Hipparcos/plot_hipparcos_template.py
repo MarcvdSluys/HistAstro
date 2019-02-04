@@ -8,13 +8,14 @@ r2d = m.degrees(1)  # Radians to degrees
 d2r = 1.0/r2d       # Degrees to radians
 
 # Read columns 2-4 from the input file, skipping the first line:
-hip = np.loadtxt('hipparcos.csv', skiprows=1, delimiter=',', usecols=(1,2,3))
+hip = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(1,2,3))
 
 # Use comprehensible array names:
-mag   = hip[:,0]                             # Magnitude
-ra    = hip[:,1]                             # Right ascension (rad)
-dec   = hip[:,2]                             # Declination (rad)
-sizes = 30*(0.5 + (7.0-mag)/3.0)**2          # Scale stars inversely with mag.
+mag    = hip[:,0]                            # Magnitude
+ra     = hip[:,1]                            # Right ascension (rad)
+dec    = hip[:,2]                            # Declination (rad)
+limMag = 7.0                                 # Limiting magnitude
+sizes  = 30*(0.5 + (limMag-mag)/3.0)**2      # Scale stars inversely with mag.
 
 # Set the plot boundaries:
 raMin  = 26.0*d2r
@@ -30,7 +31,7 @@ sel = np.logical_and(sel, dec < decMax)
 
 plt.figure(figsize=(9,7))                  # Set png size to 900x700 (dpi=100)
 
-# Create a scatter plot:
+# Make a scatter plot.  s contains the *surface areas* of the circles:
 plt.scatter(ra[sel]*r2d, dec[sel]*r2d, s=sizes[sel])
 
 plt.axis('scaled')                                        # Use a 'square grid'

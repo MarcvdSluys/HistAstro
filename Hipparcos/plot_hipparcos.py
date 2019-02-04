@@ -34,12 +34,12 @@ xkcd = False
 # Read the input file, skipping the first two lines:
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',')  # Works (old file, no text)
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))  # Works (old file, no text)
-#hip = np.genfromtxt('hipparcos.csv', skip_header=1, delimiter=',')  # WORKS, but text fields become nan
-#hip = np.genfromtxt('hipparcos.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
+#hip = np.genfromtxt('BrightStars.csv', skip_header=1, delimiter=',')  # WORKS, but text fields become nan
+#hip = np.genfromtxt('BrightStars.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
 
 t1 = time.perf_counter() 
-hip    = np.loadtxt('hipparcos.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers
-hiptxt = np.loadtxt('hipparcos.csv', skiprows=2, delimiter=',', usecols=(10,11,12), dtype=np.str)  # Read the text columns
+hip    = np.loadtxt('BrightStars.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers
+hiptxt = np.loadtxt('BrightStars.csv', skiprows=2, delimiter=',', usecols=(10,11,12), dtype=np.str)  # Read the text columns
 t2 = time.perf_counter() 
 
 # Columns: 0: hip#, 1: vmag, 2: ra (rad), 3: dec (rad), 4: pmRA (mas/yr), 5: pmDec (mas/yr), 6: ErRA (?), 7:
@@ -98,7 +98,7 @@ if xkcd:
 #plt.style.use('dark_background')
 plt.figure(figsize=(10,7))                   # Set png size to 1000x700 (dpi=100)
 
-# Create a scatter plot:
+# Make a scatter plot.  s contains the *surface areas* of the circles:
 plt.scatter(ra[sel]*r2d, dec[sel]*r2d, s=sizes[sel])
 
 plt.scatter(raOld[sel]*r2d, decOld[sel]*r2d, s=sizes[sel])
@@ -124,6 +124,7 @@ eps = 0.40931975  # For 2000 in rad
 lon,lat = eq2ecl(ra,dec, eps)
 
 
+# I use five coordinates for the corners of the map, in order to plot four lines below.
 lonMinMax,latMinMax = eq2ecl([raMin,raMax,raMax,raMin,raMin],[decMin,decMin,decMax,decMax,decMin], eps)
 lonMin = min(lonMinMax)
 lonMax = max(lonMinMax)
