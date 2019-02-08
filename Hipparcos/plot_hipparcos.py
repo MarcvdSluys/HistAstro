@@ -15,7 +15,7 @@ mas2r = d2r/3.6e6      # Milliarcseconds to radians
 h2r   = d2r*15          # Hours to radians
 
 def eq2ecl(ra,dec, eps):
-    lon = np.arctan2( np.sin(ra)  * m.cos(eps) + np.tan(dec) * m.sin(eps),  np.cos(ra) )
+    lon = np.arctan2( np.sin(ra)  * m.cos(eps) + np.tan(dec) * m.sin(eps),  np.cos(ra) ) % pi2
     lat =  np.arcsin( np.sin(dec) * m.cos(eps) - np.cos(dec) * m.sin(eps) * np.sin(ra) )
     return lon,lat
 
@@ -179,12 +179,12 @@ if xkcd:
     plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
     plt.xkcd()  # Plot everything that follows in XKCD style
     
-plt.figure(figsize=(10,3))                   # Set png size to 1000x700 (dpi=100)
+plt.figure(figsize=(10,5.5))                   # Set png size to 1000x550 (dpi=100)
 
 azMin  = 225*d2r
 azMax  = 305*d2r
 altMin = 0*d2r
-altMax = 20*d2r
+altMax = 40*d2r
 
 Mlim = 4.5  # Magnitude limit
 sizes = 20*(0.5 + (Mlim-mag)/3.0)**2     # Scale inversely with magnitude.  Square, since scatter() uses surface area
