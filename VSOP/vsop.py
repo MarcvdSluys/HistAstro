@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import math as m
-import numpy as np
+#import numpy as np
 import fortranformat as ff
 
 def readVSOP(fileName):
@@ -46,32 +46,65 @@ def computeLBR(JDE, lonTerms,latTerms,radTerms):
     return lon,lat,rad
 
 
+def hc2gc(l0,b0,r0, l,b,r):
+    # Convert from heliocentric spherical to rectangular coordinates, and take the difference (i.e.,
+    # geocentric rectangular coordinates):
+    x = r * m.cos(b) * m.cos(l)  -  r0 * m.cos(b0) * m.cos(l0)
+    y = r * m.cos(b) * m.sin(l)  -  r0 * m.cos(b0) * m.sin(l0)
+    z = r * m.sin(b)             -  r0 * m.sin(b0)
+    
+    # Convert geocentric rectangular to spherical coordinates:
+    if x==0 and y==0 and z==0:
+        lon = 0.0
+        lat = 0.0
+        rad = 0.0
+    else:
+        x2 = x**2
+        y2 = y**2
+        
+        lon = m.atan2(y,x)                 # Longitude
+        lat = m.atan2(z, m.sqrt(x2 + y2))  # Latitude
+        rad = m.sqrt(x2 + y2 + z**2)       # Distance
+       
+    return lon,lat,rad
+
+
 # Read a VSOP data files for Earth and desired planet:
 lonTermsE,latTermsE,radTermsE = readVSOP('VSOP87D.ear')
 lonTerms,latTerms,radTerms = readVSOP('VSOP87D.jup')
 #lonTerms,latTerms,radTerms = readVSOP('VSOP87D.ura')
 
-print(np.shape(lonTerms))
-print(lonTerms[0])
-print(lonTerms[-1])
+#print(np.shape(lonTerms))
+#print(lonTerms[0])
+#print(lonTerms[-1])
+#
+#print(np.shape(latTerms))
+#print(latTerms[0])
+#print(latTerms[-1])
+#
+#print(np.shape(radTerms))
+#print(radTerms[0])
+#print(radTerms[-1])
 
-print(np.shape(latTerms))
-print(latTerms[0])
-print(latTerms[-1])
-
-print(np.shape(radTerms))
-print(radTerms[0])
-print(radTerms[-1])
 
 
-# Compute heliocentric position:
+# Compute heliocentric ecliptical coordinates:
 JDE = 2451545.0
 
 # Earth:
+print()
 HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
 print(HClonE,HClatE,HCradE)
 
 # Planet:
+print()
 HClon,HClat,HCrad = computeLBR(JDE, lonTerms,latTerms,radTerms)
 print(HClon,HClat,HCrad)
+
+
+
+# Compute geocentric ecliptical coordinates:
+print()
+lon,lat,rad = hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
+print(lon,lat,rad)
 
