@@ -68,43 +68,34 @@ def hc2gc(l0,b0,r0, l,b,r):
        
     return lon,lat,rad
 
+#exit()
 
 # Read a VSOP data files for Earth and desired planet:
 lonTermsE,latTermsE,radTermsE = readVSOP('VSOP87D.ear')
 lonTerms,latTerms,radTerms = readVSOP('VSOP87D.jup')
 #lonTerms,latTerms,radTerms = readVSOP('VSOP87D.ura')
 
-#print(np.shape(lonTerms))
-#print(lonTerms[0])
-#print(lonTerms[-1])
-#
-#print(np.shape(latTerms))
-#print(latTerms[0])
-#print(latTerms[-1])
-#
-#print(np.shape(radTerms))
-#print(radTerms[0])
-#print(radTerms[-1])
-
-
 
 # Compute heliocentric ecliptical coordinates:
-JDE = 2451545.0
+for iter in range(100):
+    JDE = 2451545.0 + iter
+    
+    # Earth:
+    HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
+    #print(HClonE,HClatE,HCradE)
+    
+    # Planet:
+    HClon,HClat,HCrad = computeLBR(JDE, lonTerms,latTerms,radTerms)
+    #print(HClon,HClat,HCrad)
+    
+    
+    
+    # Compute geocentric ecliptical coordinates:
+    lon,lat,rad = hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
+    print(iter,lon,lat,rad)
+    
 
-# Earth:
-print()
-HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
-print(HClonE,HClatE,HCradE)
-
-# Planet:
-print()
-HClon,HClat,HCrad = computeLBR(JDE, lonTerms,latTerms,radTerms)
-print(HClon,HClat,HCrad)
-
-
-
-# Compute geocentric ecliptical coordinates:
-print()
-lon,lat,rad = hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
-print(lon,lat,rad)
-
+# Benchmark:
+# Starting script:                         0.061   +- 0.003 s
+# Reading 2 VSOP files:                    0.364   +- 0.006 s
+# Computing a single geocentric position:  0.00274 +- 0.00010 s
