@@ -1,10 +1,11 @@
 #!/bin/env python3
 
 import math as m
-#import numpy as np
 import fortranformat as ff
 
+# Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file
 def readVSOP(fileName):
+    
     inFile = open(fileName,'r')
     
     formatHeader = ff.FortranRecordReader('(40x,I3, 16x,I1,I8)')         # Block header format
@@ -30,6 +31,7 @@ def readVSOP(fileName):
     return lonTerms,latTerms,radTerms
 
 
+# Compute heliocentric ecliptical coordinates from periodic terms
 def computeLBR(JDE, lonTerms,latTerms,radTerms):
     tau = (JDE - 2451545.0)/365250.0
     
@@ -43,12 +45,13 @@ def computeLBR(JDE, lonTerms,latTerms,radTerms):
     for terms in radTerms:
         cosTerm = terms[1] * m.cos(terms[2] + terms[3]*tau)
         rad += cosTerm * tau**terms[0]
+        
     return lon,lat,rad
 
 
+# Convert from heliocentric spherical to rectangular coordinates, and take the difference (i.e., geocentric
+# rectangular coordinates):
 def hc2gc(l0,b0,r0, l,b,r):
-    # Convert from heliocentric spherical to rectangular coordinates, and take the difference (i.e.,
-    # geocentric rectangular coordinates):
     x = r * m.cos(b) * m.cos(l)  -  r0 * m.cos(b0) * m.cos(l0)
     y = r * m.cos(b) * m.sin(l)  -  r0 * m.cos(b0) * m.sin(l0)
     z = r * m.sin(b)             -  r0 * m.sin(b0)
@@ -67,6 +70,8 @@ def hc2gc(l0,b0,r0, l,b,r):
         rad = m.sqrt(x2 + y2 + z**2)       # Distance
        
     return lon,lat,rad
+
+
 
 #exit()
 
@@ -96,6 +101,6 @@ for iter in range(100):
     
 
 # Benchmark:
-# Starting script:                         0.061   +- 0.003 s
-# Reading 2 VSOP files:                    0.364   +- 0.006 s
-# Computing a single geocentric position:  0.00274 +- 0.00010 s
+# Starting script:                0.061   +- 0.003 s
+# Reading 2 VSOP files:           0.364   +- 0.006 s
+# Computing geocentric position:  0.00274 +- 0.00010 s
