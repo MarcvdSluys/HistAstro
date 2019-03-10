@@ -15,17 +15,52 @@ h2r   = d2r*15        # Hours to radians
 as2r  = d2r/3.6e3     # Arcseconds to radians
 mas2r = as2r/1000.0   # Milliarcseconds to radians
 
+
 def eq2ecl(ra,dec, eps):
     """Convert equatorial coordinates to ecliptical"""
     lon = np.arctan2( np.sin(ra)  * m.cos(eps) + np.tan(dec) * m.sin(eps),  np.cos(ra) ) % pi2
     lat =  np.arcsin( np.sin(dec) * m.cos(eps) - np.cos(dec) * m.sin(eps) * np.sin(ra) )
     return lon,lat
 
+
 def par2horiz(ha,dec, phi):
     """Convert parallactic coordinates to horizontal"""
     az  = np.arctan2( np.sin(ha),   np.cos(ha) * m.sin(phi) - np.tan(dec) * m.cos(phi) ) % pi2
     alt = np.arcsin(  np.sin(dec) * m.sin(phi) + np.cos(ha) * np.cos(dec) * m.cos(phi) )
     return az,alt
+
+
+def julianDay(year,month,day):
+    """Compute the Julian Day for a given year, month and (decimal) day UT"""
+    year0 = year
+    if month <= 2:  # Jan and Feb are month 13 and 14 of the previous year
+       year -= 1
+       month += 12
+       
+    b = 0
+    if year0 > 1582:     # Assume a Gregorian date
+       a = m.floor(year/100.0)
+       b = 2 - a + m.floor(a/4.0)
+    
+    jd = m.floor(365.25*(year+4716)) + m.floor(30.6001*(month+1)) + day + b - 1524.5
+    return jd
+
+    
+def obliquity(jd):
+    """Compute the obliquity of the ecliptic for the specified JD - unchecked"""
+    tJC = (jd - 2451545.0)/36525  # Time in Julian centuries since J2000.0
+    eps = 23.4392911*d2r
+    eps += (-46.00815*tJC - 0.0000059*tJC**2 + 0.00001813*tJC**3)*as2r
+    return eps
+
+
+def properMotion(startYear,targetYear, ra,dec, pma,pmd):
+    """Compute the proper motion from startYear to targetYear for the positions given in (numpy arrays) ra and dec and proper motions in pma,pmd"""
+    dt = targetYear - startYear
+    raOld  = ra  + pma*dt / np.cos(dec)
+    decOld = dec + pmd*dt
+    return raOld,decOld
+
 
 def precessHip(jd, ra,dec):
     """Compute precession in equatorial coordinates from the Hipparcos epoch (J2000) to the specified JD"""
@@ -41,12 +76,7 @@ def precessHip(jd, ra,dec):
     decNew = np.arcsin( np.cos(ra + zeta) * m.sin(theta) * np.cos(dec)  +  m.cos(theta) * np.sin(dec) )
     return raNew,decNew
 
-def properMotion(startYear,targetYear, ra,dec, pma,pmd):
-    """Compute the proper motion from startYear to targetYear for the positions given in (numpy arrays) ra and dec and proper motions in pma,pmd"""
-    dt = targetYear - startYear
-    raOld  = ra  + pma*dt / np.cos(dec)
-    decOld = dec + pmd*dt
-    return raOld,decOld
+
 
 
 
@@ -54,7 +84,6 @@ def properMotion(startYear,targetYear, ra,dec, pma,pmd):
 import time
 t0 = time.perf_counter() 
 
-xkcd = False
 
 # Read the input file, skipping the first two lines:
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',')  # Works (old file, no text)
@@ -112,10 +141,6 @@ sel = np.logical_and(sel, dec < decMax)
 
 
 # Plot equatorial map:
-if xkcd:
-    plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
-    plt.xkcd()  # Plot everything that follows in XKCD style
-
 #plt.style.use('dark_background')
 plt.figure(figsize=(10,7))                   # Set png size to 1000x700 (dpi=100)
 
@@ -163,10 +188,6 @@ sel = np.logical_and(sel, lat < latMax)
 
 
 # Plot ecliptic map:
-if xkcd:
-    plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
-    plt.xkcd()  # Plot everything that follows in XKCD style
-    
 plt.figure(figsize=(10,7))                   # Set png size to 1000x700 (dpi=100)
 
 # Create a scatter plot:
@@ -196,11 +217,19 @@ phi = 51.178*d2r
 ha = -6*h2r - ra  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
 az,alt = par2horiz(ha,dec, phi)
 
-if xkcd:
-    plt.xkcd()  # Plot everything that follows in XKCD style (needed 2x somehow)
-    plt.xkcd()  # Plot everything that follows in XKCD style
-    
+# Correct for proper motion and precession:
+#year = -10000
+year = 1000
+raOld,decOld = properMotion(1991.25,year, ra,dec, pma,pmd)
+jd = julianDay(year,1,1.)
+raOld,decOld = precessHip(jd, raOld,decOld)
+
+haOld = -6*h2r - raOld  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
+azOld,altOld = par2horiz(haOld,decOld, phi)
+
+
 plt.figure(figsize=(10,5.5))                   # Set png size to 1000x550 (dpi=100)
+#plt.figure(figsize=(20,11))                   # Set png size to 2000x1100 (dpi=100)
 
 azMin  = 225*d2r
 azMax  = 305*d2r
@@ -218,6 +247,8 @@ sel = np.logical_and(sel, mag < Mlim)
 
 # Create a scatter plot:
 plt.scatter(az[sel]*r2d, alt[sel]*r2d, s=sizes[sel])
+sel = mag < Mlim  # Magnitude limit only
+plt.scatter(azOld[sel]*r2d, altOld[sel]*r2d, s=sizes[sel], alpha=1.)
 
 
 plt.axis('scaled')                          # Set axes to a 'square grid' by moving the plot box inside the figure
