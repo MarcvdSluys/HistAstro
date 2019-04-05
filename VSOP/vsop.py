@@ -65,7 +65,7 @@ def hc2gc(l0,b0,r0, l,b,r):
         x2 = x**2
         y2 = y**2
         
-        lon = m.atan2(y,x)                 # Longitude
+        lon = m.atan2(y, x)                # Longitude
         lat = m.atan2(z, m.sqrt(x2 + y2))  # Latitude
         rad = m.sqrt(x2 + y2 + z**2)       # Distance
        

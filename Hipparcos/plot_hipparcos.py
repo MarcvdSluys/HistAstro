@@ -50,7 +50,7 @@ def obliquity(jd):
     """Compute the obliquity of the ecliptic for the specified JD - unchecked"""
     tJC = (jd - 2451545.0)/36525  # Time in Julian centuries since J2000.0
     eps = 23.4392911*d2r
-    eps += (-46.00815*tJC - 0.0000059*tJC**2 + 0.00001813*tJC**3)*as2r
+    eps += (-46.815*tJC - 0.00059*tJC**2 + 0.001813*tJC**3)*as2r
     return eps
 
 
@@ -120,7 +120,6 @@ t3 = time.perf_counter()
 raOld,decOld = properMotion(1991.25,-1500, ra,dec, pma,pmd)
 
 
-
 t4 = time.perf_counter() 
 raMin  = 26.0*d2r
 raMax  = 50.0*d2r
@@ -166,7 +165,7 @@ plt.close()                                  # Close the plot
 
 # Convert to ecliptic coordinates:
 t5 = time.perf_counter() 
-eps = 0.40931975  # For 2000 in rad
+eps = 0.40909280  # For 2000 in rad
 lon,lat = eq2ecl(ra,dec, eps)
 
 
@@ -218,8 +217,8 @@ ha = -6*h2r - ra  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
 az,alt = par2horiz(ha,dec, phi)
 
 # Correct for proper motion and precession:
-#year = -10000
-year = 1000
+year = -10000
+#year = 1000
 raOld,decOld = properMotion(1991.25,year, ra,dec, pma,pmd)
 jd = julianDay(year,1,1.)
 raOld,decOld = precessHip(jd, raOld,decOld)
