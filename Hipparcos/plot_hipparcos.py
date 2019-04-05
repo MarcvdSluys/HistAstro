@@ -54,11 +54,11 @@ def obliquity(jd):
     return eps
 
 
-def properMotion(startYear,targetYear, ra,dec, pma,pmd):
-    """Compute the proper motion from startYear to targetYear for the positions given in (numpy arrays) ra and dec and proper motions in pma,pmd"""
-    dt = targetYear - startYear
-    raOld  = ra  + pma*dt / np.cos(dec)
-    decOld = dec + pmd*dt
+def properMotion(startJD,targetJD, ra,dec, pma,pmd):
+    """Compute the proper motion from startJD to targetJD for the positions given in (numpy arrays) ra and dec and proper motions in pma,pmd"""
+    dtYr = (targetJD - startJD)/365.25
+    raOld  = ra  + pma*dtYr / np.cos(dec)
+    decOld = dec + pmd*dtYr
     return raOld,decOld
 
 
@@ -116,8 +116,10 @@ pmd = hip[:,5]*mas2r                     # pmDec, mas/yr -> rad/yr
 
 
 # Correct for proper motion:
-t3 = time.perf_counter() 
-raOld,decOld = properMotion(1991.25,-1500, ra,dec, pma,pmd)
+t3 = time.perf_counter()
+jd1 = julianDay( 1991, 4, 1)
+jd2 = julianDay(-1500, 1, 1)
+raOld,decOld = properMotion(jd1,jd2, ra,dec, pma,pmd)
 
 
 t4 = time.perf_counter() 
@@ -219,9 +221,10 @@ az,alt = par2horiz(ha,dec, phi)
 # Correct for proper motion and precession:
 year = -10000
 #year = 1000
-raOld,decOld = properMotion(1991.25,year, ra,dec, pma,pmd)
-jd = julianDay(year,1,1.)
-raOld,decOld = precessHip(jd, raOld,decOld)
+jd1 = julianDay(1991, 4, 1)
+jd2 = julianDay(year, 1, 1)
+raOld,decOld = properMotion(jd1,jd2, ra,dec, pma,pmd)
+raOld,decOld = precessHip(jd2, raOld,decOld)
 
 haOld = -6*h2r - raOld  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
 azOld,altOld = par2horiz(haOld,decOld, phi)
