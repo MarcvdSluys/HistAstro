@@ -55,7 +55,10 @@ def obliquity(jd):
 
 
 def properMotion(startJD,targetJD, ra,dec, pma,pmd):
-    """Compute the proper motion from startJD to targetJD for the positions given in (numpy arrays) ra and dec and proper motions in pma,pmd"""
+    """Compute the proper motion from startJD to targetJD for the positions given in (numpy arrays) ra and dec
+    (in rad) and proper motions in pma,pmd (in rad/yr)
+
+    """
     dtYr = (targetJD - startJD)/365.25
     raOld  = ra  + pma*dtYr / np.cos(dec)
     decOld = dec + pmd*dtYr
@@ -92,8 +95,8 @@ t0 = time.perf_counter()
 #hip = np.genfromtxt('BrightStars.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
 
 t1 = time.perf_counter() 
-hip    = np.loadtxt('BrightStars.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers
-hiptxt = np.loadtxt('BrightStars.csv', skiprows=2, delimiter=',', usecols=(10,11,12), dtype=np.str)  # Read the text columns
+hip    = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers in columns 0-5: HIP, V, ra, dec, pma, pmd
+#hiptxt = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(7,10,11), dtype=np.str)  # Read the text columns
 t2 = time.perf_counter() 
 
 # Columns: 0: hip#, 1: vmag, 2: ra (rad), 3: dec (rad), 4: pmRA (mas/yr), 5: pmDec (mas/yr), 6: ErRA (?), 7:
