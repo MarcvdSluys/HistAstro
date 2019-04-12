@@ -47,7 +47,7 @@ def julianDay(year,month,day):
 
     
 def obliquity(jd):
-    """Compute the obliquity of the ecliptic for the specified JD - unchecked"""
+    """Compute the obliquity of the ecliptic for the specified JD"""
     tJC = (jd - 2451545.0)/36525  # Time in Julian centuries since J2000.0
     eps = 23.4392911*d2r
     eps += (-46.815*tJC - 0.00059*tJC**2 + 0.001813*tJC**3)*as2r
@@ -86,7 +86,6 @@ def precessHip(jd, ra,dec):
 # Time the execution:
 import time
 t0 = time.perf_counter() 
-
 
 # Read the input file, skipping the first two lines:
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',')  # Works (old file, no text)
@@ -222,8 +221,9 @@ ha = -6*h2r - ra  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
 az,alt = par2horiz(ha,dec, phi)
 
 # Correct for proper motion and precession:
-year = -10000
+#year = -10000
 #year = 1000
+year = -800  # Does the bear dip in the ocean in Athens in 800BC?
 jd1 = julianDay(1991, 4, 1)
 jd2 = julianDay(year, 1, 1)
 raOld,decOld = properMotion(jd1,jd2, ra,dec, pma,pmd)
@@ -271,6 +271,52 @@ t7 = time.perf_counter()
 
 
 
+
+
+
+
+
+
+# Plot polar equatorial map:
+#plt.style.use('dark_background')
+plt.figure(figsize=(7,7))                   # Set png size to 1000x700 (dpi=100)
+ax = plt.subplot(111, projection='polar')
+
+r = m.pi/2 - dec
+theta = -ra
+rOld = m.pi/2 - decOld  # Ensure raOld, decOld are for 800 BCE
+thetaOld = -raOld
+rMax = 60*d2r  # Plot limit
+
+Mlim = 5.0  # Magnitude limit
+sizes = 20*(0.5 + (Mlim-mag)/3.0)**2     # Scale inversely with magnitude.  Square, since scatter() uses surface area
+
+sel = np.logical_and(r < rMax, mag < Mlim)
+
+# Make a scatter plot.  s contains the *surface areas* of the circles:
+ax.scatter(theta[sel],    r[sel]*r2d,    s=sizes[sel])
+ax.scatter(thetaOld[sel], rOld[sel]*r2d, s=sizes[sel])
+
+# Draw a circle at 38° around NP to indicate the horizon in Athens:
+rCirc = np.ones(100)*38
+thCirc = np.arange(100)/100*m.pi*2
+ax.plot(thCirc, rCirc, 'r')
+
+# 
+# #plt.xlim(24,0)                              # Flip the x-axis range when plotting the whole sky
+# #plt.axis('equal')                            # Set axes to a 'square grid' by changing the x,y limits to match image size - should go before .axis([])
+# plt.axis('scaled')                          # Set axes to a 'square grid' by moving the plot box inside the figure
+# #plt.axis('square')                          # Set axes to a 'square grid' by moving the plot box inside the figure and setting xmax-xmin = ymax-ymin
+# plt.axis([raMax*r2d,raMin*r2d, decMin*r2d,decMax*r2d])             # Select Aries (RA=26-50 deg, dec=10-30 deg)
+# plt.xlabel(r'$\alpha_{2000}$ ($^\circ$)')           # Label the horizontal axis
+# plt.ylabel(r'$\delta_{2000}$ ($^\circ$)')           # Label the vertical axis - use LaTeX for symbols
+
+ax.set_ylim(0,rMax*r2d)
+
+plt.tight_layout()                           # Use narrow margins
+plt.savefig("hipparcos_equatorial_polar.png")                 # Save the plot as png
+#plt.show()                              # Show the plot to screen
+plt.close()                                  # Close the plot
 
 
 
