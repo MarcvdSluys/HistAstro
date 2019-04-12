@@ -37,7 +37,7 @@ def julianDay(year,month,day):
        year -= 1
        month += 12
        
-    b = 0
+    b = 0; a=0
     if year0 > 1582:     # Assume a Gregorian date
        a = m.floor(year/100.0)
        b = 2 - a + m.floor(a/4.0)
@@ -123,6 +123,9 @@ jd1 = julianDay( 1991, 4, 1)
 jd2 = julianDay(-1500, 1, 1)
 raOld,decOld = properMotion(jd1,jd2, ra,dec, pma,pmd)
 
+#print(-3000, julianDay(-3000, 1, 1.5))
+#print(1000, julianDay(1000, 1, 1.5))
+#print(2000, julianDay(2000, 1, 1.5))
 
 t4 = time.perf_counter() 
 raMin  = 26.0*d2r
@@ -253,7 +256,7 @@ sel = np.logical_and(sel, mag < Mlim)
 # Create a scatter plot:
 plt.scatter(az[sel]*r2d, alt[sel]*r2d, s=sizes[sel])
 sel = mag < Mlim  # Magnitude limit only
-plt.scatter(azOld[sel]*r2d, altOld[sel]*r2d, s=sizes[sel], alpha=1.)
+#plt.scatter(azOld[sel]*r2d, altOld[sel]*r2d, s=sizes[sel], alpha=1.)
 
 
 plt.axis('scaled')                          # Set axes to a 'square grid' by moving the plot box inside the figure
@@ -281,34 +284,35 @@ t7 = time.perf_counter()
 plt.figure(figsize=(7,7))                   # Set png size to 1000x700 (dpi=100)
 ax = plt.subplot(111, projection='polar')
 
-# Compute r and theta from ra and dec
+# Compute r and theta from ra and dec:
 r = m.pi/2 - dec
 theta = -ra
-rOld = m.pi/2 - decOld  # Ensure raOld, decOld are for 800 BCE
-thetaOld = -raOld
-rMax = 60*d2r  # Plot limit
 
+# Compute r and theta from precessed ra and dec:
+r = m.pi/2 - decOld  # Ensure raOld, decOld are for 800 BCE
+theta = -raOld
+
+rMax = 60*d2r  # Plot limit
 Mlim = 5.0  # Magnitude limit
 sizes = 20*(0.5 + (Mlim-mag)/3.0)**2     # Scale inversely with magnitude.  Square, since scatter() uses surface area
 
 # Select bright stars close to the NP:
-sel = np.logical_and(r < rMax, mag < Mlim)
+sel = (r < rMax) & (mag < Mlim)
 
 # Make a scatter plot.  s contains the *surface areas* of the circles:
 ax.scatter(theta[sel],    r[sel]*r2d,    s=sizes[sel])
-ax.scatter(thetaOld[sel], rOld[sel]*r2d, s=sizes[sel])
 
 # Draw a circle at 38° around NP to indicate the horizon in Athens:
-rCirc = np.ones(100)*38
-thCirc = np.arange(100)/100*m.pi*2
+rCirc = np.ones(101)*38
+thCirc = np.arange(101)/100*m.pi*2
 ax.plot(thCirc, rCirc, 'r')
 
 ax.set_ylim(0,rMax*r2d)
 
-plt.tight_layout()                           # Use narrow margins
-plt.savefig("hipparcos_equatorial_polar.png")                 # Save the plot as png
-#plt.show()                              # Show the plot to screen
-plt.close()                                  # Close the plot
+plt.tight_layout()                             # Use narrow margins
+plt.savefig("hipparcos_equatorial_polar.png")  # Save the plot as png
+#plt.show()                                     # Show the plot to screen
+plt.close()                                    # Close the plot
 
 
 
