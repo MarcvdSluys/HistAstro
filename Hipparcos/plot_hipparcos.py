@@ -94,7 +94,7 @@ t0 = time.perf_counter()
 #hip = np.genfromtxt('BrightStars.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
 
 t1 = time.perf_counter() 
-hip    = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers in columns 0-5: HIP, V, ra, dec, pma, pmd
+hip    = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers in columns 0-5: HIP, V, ra, dec, pma, pmd - amazingly, this can also read BrightStars.csv.gz!
 #hiptxt = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(7,10,11), dtype=np.str)  # Read the text columns
 t2 = time.perf_counter() 
 
@@ -278,10 +278,10 @@ t7 = time.perf_counter()
 
 
 # Plot polar equatorial map:
-#plt.style.use('dark_background')
 plt.figure(figsize=(7,7))                   # Set png size to 1000x700 (dpi=100)
 ax = plt.subplot(111, projection='polar')
 
+# Compute r and theta from ra and dec
 r = m.pi/2 - dec
 theta = -ra
 rOld = m.pi/2 - decOld  # Ensure raOld, decOld are for 800 BCE
@@ -291,6 +291,7 @@ rMax = 60*d2r  # Plot limit
 Mlim = 5.0  # Magnitude limit
 sizes = 20*(0.5 + (Mlim-mag)/3.0)**2     # Scale inversely with magnitude.  Square, since scatter() uses surface area
 
+# Select bright stars close to the NP:
 sel = np.logical_and(r < rMax, mag < Mlim)
 
 # Make a scatter plot.  s contains the *surface areas* of the circles:
@@ -301,15 +302,6 @@ ax.scatter(thetaOld[sel], rOld[sel]*r2d, s=sizes[sel])
 rCirc = np.ones(100)*38
 thCirc = np.arange(100)/100*m.pi*2
 ax.plot(thCirc, rCirc, 'r')
-
-# 
-# #plt.xlim(24,0)                              # Flip the x-axis range when plotting the whole sky
-# #plt.axis('equal')                            # Set axes to a 'square grid' by changing the x,y limits to match image size - should go before .axis([])
-# plt.axis('scaled')                          # Set axes to a 'square grid' by moving the plot box inside the figure
-# #plt.axis('square')                          # Set axes to a 'square grid' by moving the plot box inside the figure and setting xmax-xmin = ymax-ymin
-# plt.axis([raMax*r2d,raMin*r2d, decMin*r2d,decMax*r2d])             # Select Aries (RA=26-50 deg, dec=10-30 deg)
-# plt.xlabel(r'$\alpha_{2000}$ ($^\circ$)')           # Label the horizontal axis
-# plt.ylabel(r'$\delta_{2000}$ ($^\circ$)')           # Label the vertical axis - use LaTeX for symbols
 
 ax.set_ylim(0,rMax*r2d)
 
