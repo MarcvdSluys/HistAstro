@@ -1,13 +1,13 @@
 #!/bin/env python3
 
 import math as m
-import fortranformat as ff
 
-# Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file
 def readVSOP(fileName):
-    
+    """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file"""
+
     inFile = open(fileName,'r')
     
+    import fortranformat as ff
     formatHeader = ff.FortranRecordReader('(40x,I3, 16x,I1,I8)')         # Block header format
     formatBody   = ff.FortranRecordReader('(79x,F18.11,F14.11,F20.11)')  # Block body format
     
@@ -83,7 +83,7 @@ lonTerms,latTerms,radTerms = readVSOP('VSOP87D.jup')
 
 # Compute heliocentric ecliptical coordinates:
 for iter in range(100):
-    JDE = 2451545.0 + iter
+    JDE = 2451545.0 + iter*100
     
     # Earth:
     HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
