@@ -72,32 +72,64 @@ def hc2gc(l0,b0,r0, l,b,r):
     return lon,lat,rad
 
 
+# Convert from heliocentric rectangular coordinates to geocentric spherical coordinates):
+def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
+    dx = x - x0
+    dy = y - y0
+    dz = z - z0
+    
+    # Convert geocentric rectangular to spherical coordinates:
+    if dx==0 and dy==0 and dz==0:
+        lon = 0.0
+        lat = 0.0
+        rad = 0.0
+    else:
+        dx2 = dx**2
+        dy2 = dy**2
+        
+        lon = m.atan2(dy, dx)                 # Longitude
+        lat = m.atan2(dz, m.sqrt(dx2 + dy2))  # Latitude
+        rad = m.sqrt(dx2 + dy2 + dz**2)       # Distance
+       
+    return lon,lat,rad
+
+
 
 #exit()
 
-# Read a VSOP data files for Earth and desired planet:
+# Read VSOP data files for Earth and desired planet:
 lonTermsE,latTermsE,radTermsE = readVSOP('VSOP87D.ear')
 lonTerms,latTerms,radTerms = readVSOP('VSOP87D.jup')
 #lonTerms,latTerms,radTerms = readVSOP('VSOP87D.ura')
 
+xTermsE,yTermsE,zTermsE = readVSOP('VSOP87C.ear')
+xTerms,yTerms,zTerms = readVSOP('VSOP87C.jup')
+
 
 # Compute heliocentric ecliptical coordinates:
-for iter in range(100):
-    JDE = 2451545.0 + iter*100
+for iter in range(101):
+    #JDE = 2451545.0 + iter*100
+    JDE = 2451545.0 - iter*365*50
     
     # Earth:
     HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
+    HCxE,HCyE,HCzE = computeLBR(JDE, xTermsE,yTermsE,zTermsE)
     #print(HClonE,HClatE,HCradE)
     
     # Planet:
     HClon,HClat,HCrad = computeLBR(JDE, lonTerms,latTerms,radTerms)
+    HCx,HCy,HCz = computeLBR(JDE, xTerms,yTerms,zTerms)
     #print(HClon,HClat,HCrad)
     
     
     
     # Compute geocentric ecliptical coordinates:
     lon,lat,rad = hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
-    print(iter,lon,lat,rad)
+    #print(iter,lon,lat,rad)
+    
+    # Compute geocentric ecliptical coordinates:
+    lon1,lat1,rad1 = xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
+    print(iter, m.degrees(lon-lon1), m.degrees(lat-lat1), m.degrees(rad-rad1))
     
 
 # Benchmark:
