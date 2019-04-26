@@ -2,6 +2,7 @@
 
 import math as m
 
+
 def readVSOP(fileName):
     """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file"""
 
@@ -33,18 +34,18 @@ def readVSOP(fileName):
 
 # Compute heliocentric ecliptical coordinates from periodic terms
 def computeLBR(JDE, lonTerms,latTerms,radTerms):
-    tau = (JDE - 2451545.0)/365250.0
+    Tjm = (JDE - 2451545.0)/365250.0
     
     lon=0.0; lat=0.0; rad=0.0
     for terms in lonTerms:
-        cosTerm = terms[1] * m.cos(terms[2] + terms[3]*tau)
-        lon += cosTerm * tau**terms[0]
+        cosTerm = terms[1] * m.cos(terms[2] + terms[3]*Tjm)
+        lon += cosTerm * Tjm**terms[0]
     for terms in latTerms:
-        cosTerm = terms[1] * m.cos(terms[2] + terms[3]*tau)
-        lat += cosTerm * tau**terms[0]
+        cosTerm = terms[1] * m.cos(terms[2] + terms[3]*Tjm)
+        lat += cosTerm * Tjm**terms[0]
     for terms in radTerms:
-        cosTerm = terms[1] * m.cos(terms[2] + terms[3]*tau)
-        rad += cosTerm * tau**terms[0]
+        cosTerm = terms[1] * m.cos(terms[2] + terms[3]*Tjm)
+        rad += cosTerm * Tjm**terms[0]
         
     return lon,lat,rad
 
@@ -102,34 +103,36 @@ lonTermsE,latTermsE,radTermsE = readVSOP('VSOP87D.ear')
 lonTerms,latTerms,radTerms = readVSOP('VSOP87D.jup')
 #lonTerms,latTerms,radTerms = readVSOP('VSOP87D.ura')
 
-xTermsE,yTermsE,zTermsE = readVSOP('VSOP87C.ear')
-xTerms,yTerms,zTerms = readVSOP('VSOP87C.jup')
+#xTermsE,yTermsE,zTermsE = readVSOP('VSOP87C.ear')
+#xTerms,yTerms,zTerms = readVSOP('VSOP87C.jup')
 
 
 # Compute heliocentric ecliptical coordinates:
 for iter in range(101):
     #JDE = 2451545.0 + iter*100
-    JDE = 2451545.0 - iter*365*50
+    dYear = iter*50
+    JDE = 2451545.0 - dYear*365
     
     # Earth:
     HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
-    HCxE,HCyE,HCzE = computeLBR(JDE, xTermsE,yTermsE,zTermsE)
+    #HCxE,HCyE,HCzE = computeLBR(JDE, xTermsE,yTermsE,zTermsE)
     #print(HClonE,HClatE,HCradE)
     
     # Planet:
     HClon,HClat,HCrad = computeLBR(JDE, lonTerms,latTerms,radTerms)
-    HCx,HCy,HCz = computeLBR(JDE, xTerms,yTerms,zTerms)
+    #HCx,HCy,HCz = computeLBR(JDE, xTerms,yTerms,zTerms)
     #print(HClon,HClat,HCrad)
     
     
     
     # Compute geocentric ecliptical coordinates:
     lon,lat,rad = hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
-    #print(iter,lon,lat,rad)
+    print(iter,m.degrees(lon), m.degrees(lat),rad)
     
     # Compute geocentric ecliptical coordinates:
-    lon1,lat1,rad1 = xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
-    print(iter, m.degrees(lon-lon1), m.degrees(lat-lat1), m.degrees(rad-rad1))
+    #lon1,lat1,rad1 = xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
+    #print(iter, m.degrees(lon), m.degrees(lat), m.degrees(rad))
+    #print(iter, 2000-dYear, m.degrees(lon-lon1), m.degrees(lat-lat1), rad-rad1)  # ~3000 BCE: dl~3e-3°, db~3e-5°, dr~4e-4 AU
     
 
 # Benchmark:
