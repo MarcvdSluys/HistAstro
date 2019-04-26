@@ -2,6 +2,7 @@
 
 import math as m
 import histastro.vsop as vsop
+import histastro.coordinates as coord
 
 
 # Read VSOP data files for Earth and desired planet:
@@ -14,12 +15,10 @@ lonTerms,latTerms,radTerms = vsop.readVSOP('VSOP87D.jup')
 
 
 # Compute heliocentric ecliptical coordinates:
-for iter in range(101):
+for iter in range(1):
     #JDE = 2451545.0 + iter*100
     dYear = iter*50
     JDE = 2451545.0 - dYear*365
-    #JDE = 2448347.5000000000
-    #JDE = -1931442.5000000000
     
     # Earth:
     HClonE,HClatE,HCradE = vsop.computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
@@ -41,6 +40,13 @@ for iter in range(101):
     #lon1,lat1,rad1 = vsop.xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
     #print(iter, m.degrees(lon), m.degrees(lat), m.degrees(rad))
     #print(iter, 2000-dYear, m.degrees(lon-lon1), m.degrees(lat-lat1), rad-rad1)  # ~3000 BCE: dl~3e-3d, db~3e-5d, dr~4e-4 AU
+    
+
+# Check obliquity:
+JDE = 2448347.5000000000
+print(iter, 2000-dYear, JDE, m.degrees(coord.obliquity(JDE)))
+JDE = -1931442.5000000000
+print(iter, 2000-dYear, JDE, m.degrees(coord.obliquity(JDE)))
     
 
 # Benchmark:
