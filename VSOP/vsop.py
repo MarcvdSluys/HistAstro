@@ -112,6 +112,8 @@ for iter in range(101):
     #JDE = 2451545.0 + iter*100
     dYear = iter*50
     JDE = 2451545.0 - dYear*365
+    #JDE = 2448347.5000000000
+    #JDE = -1931442.5000000000
     
     # Earth:
     HClonE,HClatE,HCradE = computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
@@ -127,7 +129,7 @@ for iter in range(101):
     
     # Compute geocentric ecliptical coordinates:
     lon,lat,rad = hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
-    print(iter,m.degrees(lon), m.degrees(lat),rad)
+    #print(iter,m.degrees(lon), m.degrees(lat),rad)
     
     # Compute geocentric ecliptical coordinates:
     #lon1,lat1,rad1 = xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
