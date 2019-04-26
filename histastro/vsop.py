@@ -1,3 +1,5 @@
+"""HistAstro VSOP87 functions"""
+
 import math as m
 
 def readVSOP(fileName):

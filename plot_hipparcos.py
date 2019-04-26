@@ -5,6 +5,10 @@ import math as m
 import numpy as np
 import matplotlib.pyplot as plt
 
+import histastro.coordinates as coord
+import histastro.datetime as dt
+
+
 # Constants:
 pi    = m.pi
 pi2   = 2*pi
@@ -16,72 +20,7 @@ as2r  = d2r/3.6e3     # Arcseconds to radians
 mas2r = as2r/1000.0   # Milliarcseconds to radians
 
 
-def eq2ecl(ra,dec, eps):
-    """Convert equatorial coordinates to ecliptical"""
-    lon = np.arctan2( np.sin(ra)  * m.cos(eps) + np.tan(dec) * m.sin(eps),  np.cos(ra) ) % pi2
-    lat =  np.arcsin( np.sin(dec) * m.cos(eps) - np.cos(dec) * m.sin(eps) * np.sin(ra) )
-    return lon,lat
-
-
-def par2horiz(ha,dec, phi):
-    """Convert parallactic coordinates to horizontal"""
-    az  = np.arctan2( np.sin(ha),   np.cos(ha) * m.sin(phi) - np.tan(dec) * m.cos(phi) ) % pi2
-    alt = np.arcsin(  np.sin(dec) * m.sin(phi) + np.cos(ha) * np.cos(dec) * m.cos(phi) )
-    return az,alt
-
-
-def julianDay(year,month,day):
-    """Compute the Julian Day for a given year, month and (decimal) day UT"""
-    year0 = year
-    if month <= 2:  # Jan and Feb are month 13 and 14 of the previous year
-       year -= 1
-       month += 12
-       
-    b = 0; a=0
-    if year0 > 1582:     # Assume a Gregorian date
-       a = m.floor(year/100.0)
-       b = 2 - a + m.floor(a/4.0)
     
-    jd = m.floor(365.25*(year+4716)) + m.floor(30.6001*(month+1)) + day + b - 1524.5
-    return jd
-
-    
-def obliquity(JD):
-    """Compute the obliquity of the ecliptic in radians from the specified JD(E)  (Seidelman 1992, Eq. 3.222-1)"""
-    tJC = (JD - 2451545.0)/36525  # Time in Julian centuries since J2000.0
-    #eps = 23.4392911*d2r
-    #eps += (-46.815*tJC - 0.00059*tJC**2 + 0.001813*tJC**3)*as2r
-    eps = 0.409092804 - 2.269655e-4*tJC - 2.86e-9*tJC**2 + 8.78967e-9*tJC**3
-    return eps
-
-
-def properMotion(startJD,targetJD, ra,dec, pma,pmd):
-    """Compute the proper motion from startJD to targetJD for the positions given in (numpy arrays) ra and dec
-    (in rad) and proper motions in pma,pmd (in rad/yr)
-
-    """
-    dtYr = (targetJD - startJD)/365.25
-    raOld  = ra  + pma*dtYr / np.cos(dec)
-    decOld = dec + pmd*dtYr
-    return raOld,decOld
-
-
-def precessHip(jd, ra,dec):
-    """Compute precession in equatorial coordinates from the Hipparcos epoch (J2000) to the specified JD"""
-    tJC = (jd - 2451545.0)/36525  # Time in Julian centuries since J2000.0
-    tJC2 = tJC**2
-    tJC3 = tJC*tJC2
-    
-    zeta  = (2306.2181*tJC + 0.30188*tJC2 + 0.017998*tJC3)*as2r
-    z     = (2306.2181*tJC + 1.09468*tJC2 + 0.018203*tJC3)*as2r
-    theta = (2004.3109*tJC - 0.42665*tJC2 - 0.041833*tJC3)*as2r
-    
-    raNew  = np.arctan2( np.sin(ra + zeta) * np.cos(dec),  np.cos(ra + zeta) * m.cos(theta) * np.cos(dec) - m.sin(theta) * np.sin(dec) ) + z
-    decNew = np.arcsin( np.cos(ra + zeta) * m.sin(theta) * np.cos(dec)  +  m.cos(theta) * np.sin(dec) )
-    return raNew,decNew
-
-
-
 
 
 # Time the execution:
@@ -120,13 +59,13 @@ pmd = hip[:,5]*mas2r                     # pmDec, mas/yr -> rad/yr
 
 # Correct for proper motion:
 t3 = time.perf_counter()
-jd1 = julianDay( 1991, 4, 1)
-jd2 = julianDay(-1500, 1, 1)
-raOld,decOld = properMotion(jd1,jd2, ra,dec, pma,pmd)
+jd1 = dt.julianDay( 1991, 4, 1)
+jd2 = dt.julianDay(-1500, 1, 1)
+raOld,decOld = coord.properMotion(jd1,jd2, ra,dec, pma,pmd)
 
-#print(-3000, julianDay(-3000, 1, 1.5))
-#print(1000, julianDay(1000, 1, 1.5))
-#print(2000, julianDay(2000, 1, 1.5))
+#print(-3000, dt.julianDay(-3000, 1, 1.5))
+#print(1000, dt.julianDay(1000, 1, 1.5))
+#print(2000, dt.julianDay(2000, 1, 1.5))
 
 t4 = time.perf_counter() 
 raMin  = 26.0*d2r
@@ -174,11 +113,11 @@ plt.close()                                  # Close the plot
 # Convert to ecliptic coordinates:
 t5 = time.perf_counter() 
 eps = 0.40909280  # For 2000 in rad
-lon,lat = eq2ecl(ra,dec, eps)
+lon,lat = coord.eq2ecl(ra,dec, eps)
 
 
 # I use five coordinates for the corners of the map, in order to plot four lines below.
-lonMinMax,latMinMax = eq2ecl([raMin,raMax,raMax,raMin,raMin],[decMin,decMin,decMax,decMax,decMin], eps)
+lonMinMax,latMinMax = coord.eq2ecl([raMin,raMax,raMax,raMin,raMin],[decMin,decMin,decMax,decMax,decMin], eps)
 lonMin = min(lonMinMax)
 lonMax = max(lonMinMax)
 latMin = min(latMinMax)
@@ -222,19 +161,19 @@ t6 = time.perf_counter()
 phi = 51.178*d2r
 
 ha = -6*h2r - ra  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
-az,alt = par2horiz(ha,dec, phi)
+az,alt = coord.par2horiz(ha,dec, phi)
 
 # Correct for proper motion and precession:
 #year = -10000
 #year = 1000
 year = -800  # Does the bear dip in the ocean in Athens in 800BC?
-jd1 = julianDay(1991, 4, 1)
-jd2 = julianDay(year, 1, 1)
-raOld,decOld = properMotion(jd1,jd2, ra,dec, pma,pmd)
-raOld,decOld = precessHip(jd2, raOld,decOld)
+jd1 = dt.julianDay(1991, 4, 1)
+jd2 = dt.julianDay(year, 1, 1)
+raOld,decOld = coord.properMotion(jd1,jd2, ra,dec, pma,pmd)
+raOld,decOld = coord.precessHip(jd2, raOld,decOld)
 
 haOld = -6*h2r - raOld  # At the spring equinox and sunrise ra_sun = 0, ha_sun=-6h
-azOld,altOld = par2horiz(haOld,decOld, phi)
+azOld,altOld = coord.par2horiz(haOld,decOld, phi)
 
 
 plt.figure(figsize=(10,5.5))                   # Set png size to 1000x550 (dpi=100)
@@ -303,7 +242,7 @@ sel = (r < rMax) & (mag < Mlim)
 # Make a scatter plot.  s contains the *surface areas* of the circles:
 ax.scatter(theta[sel],    r[sel]*r2d,    s=sizes[sel])
 
-# Draw a circle at 38° around NP to indicate the horizon in Athens:
+# Draw a circle at 38deg around NP to indicate the horizon in Athens:
 rCirc = np.ones(101)*38
 thCirc = np.arange(101)/100*m.pi*2
 ax.plot(thCirc, rCirc, 'r')
