@@ -8,7 +8,7 @@ r2d = m.degrees(1)  # Radians to degrees
 d2r = 1.0/r2d       # Degrees to radians
 
 # Read columns 2-4 from the input file, skipping the first line:
-hip = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(1,2,3))
+hip = np.loadtxt('data/BrightStars.csv', skiprows=1, delimiter=',', usecols=(1,2,3))
 
 # Use comprehensible array names:
 mag    = hip[:,0]                            # Magnitude

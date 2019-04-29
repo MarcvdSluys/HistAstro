@@ -21,7 +21,7 @@ d2r   = 1.0/r2d       # Degrees to radians
 # Columns: 0: hip#, 1: vmag, 2: ra (rad), 3: dec (rad), 4: pmRA (mas/yr), 5: pmDec (mas/yr), 6: ErRA (?), 7:
 # ErDec (?), 8: ErPa (mas/yr), 9: ErPd (mas/yr)
 
-hip = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(1,2,3))    # Read the numbers in columns 1-3: V, ra, dec - amazingly, this can also read BrightStars.csv.gz!
+hip = np.loadtxt('data/BrightStars.csv', skiprows=1, delimiter=',', usecols=(1,2,3))    # Read the numbers in columns 1-3: V, ra, dec - amazingly, this can also read BrightStars.csv.gz!
 
 mag = hip[:,0]
 ra  = hip[:,1]                           # Right ascension (rad)

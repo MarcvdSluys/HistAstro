@@ -31,12 +31,12 @@ t0 = time.perf_counter()
 # Read the input file, skipping the first two lines:
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',')  # Works (old file, no text)
 #hip = np.loadtxt('combihip.csv', skiprows=2, delimiter=',', usecols=(0,1,2,3,4,5))  # Works (old file, no text)
-#hip = np.genfromtxt('BrightStars.csv', skip_header=1, delimiter=',')  # WORKS, but text fields become nan
-#hip = np.genfromtxt('BrightStars.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
+#hip = np.genfromtxt('data/BrightStars.csv', skip_header=1, delimiter=',')  # WORKS, but text fields become nan
+#hip = np.genfromtxt('data/BrightStars.csv', skip_header=1, delimiter=',', dtype=None)  # WORKS, but get hip[15544][13] iso hip[15544,13] 
 
 t1 = time.perf_counter() 
-hip    = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers in columns 0-5: HIP, V, ra, dec, pma, pmd - amazingly, this can also read BrightStars.csv.gz!
-#hiptxt = np.loadtxt('BrightStars.csv', skiprows=1, delimiter=',', usecols=(7,10,11), dtype=np.str)  # Read the text columns
+hip    = np.loadtxt('data/BrightStars.csv', skiprows=1, delimiter=',', usecols=(0,1,2,3,4,5))             # Read the numbers in columns 0-5: HIP, V, ra, dec, pma, pmd - amazingly, this can also read BrightStars.csv.gz!
+#hiptxt = np.loadtxt('data/BrightStars.csv', skiprows=1, delimiter=',', usecols=(7,10,11), dtype=np.str)  # Read the text columns
 t2 = time.perf_counter() 
 
 # Columns: 0: hip#, 1: vmag, 2: ra (rad), 3: dec (rad), 4: pmRA (mas/yr), 5: pmDec (mas/yr), 6: ErRA (?), 7:
