@@ -6,19 +6,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import histastro.coordinates as coord
-import histastro.datetime as dt
-
 
 
 # Constants:
-pi    = m.pi
-pi2   = 2*pi
 r2d   = m.degrees(1)  # Radians to degrees
 d2r   = 1.0/r2d       # Degrees to radians
 h2r   = d2r*15        # Hours to radians
-as2r  = d2r/3.6e3     # Arcseconds to radians
-mas2r = as2r/1000.0   # Milliarcseconds to radians
-
 
     
 # Read the Hipparcos catalogue
