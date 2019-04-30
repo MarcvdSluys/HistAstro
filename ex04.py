@@ -7,12 +7,12 @@ import histastro.coordinates as coord
 
 
 # Read VSOP data files for Earth and desired planet:
-lonTermsE,latTermsE,radTermsE = vsop.readVSOP('VSOP87D.ear')
-lonTerms,latTerms,radTerms = vsop.readVSOP('VSOP87D.jup')
-#lonTerms,latTerms,radTerms = vsop.readVSOP('VSOP87D.ura')
+lonTermsE,latTermsE,radTermsE = vsop.readVSOP('data/VSOP87D.ear')
+lonTerms,latTerms,radTerms = vsop.readVSOP('data/VSOP87D.jup')
+#lonTerms,latTerms,radTerms = vsop.readVSOP('data/VSOP87D.ura')
 
-#xTermsE,yTermsE,zTermsE = vsop.readVSOP('VSOP87C.ear')
-#xTerms,yTerms,zTerms = vsop.readVSOP('VSOP87C.jup')
+#xTermsE,yTermsE,zTermsE = vsop.readVSOP('data/VSOP87C.ear')
+#xTerms,yTerms,zTerms = vsop.readVSOP('data/VSOP87C.jup')
 
 
 # Compute heliocentric ecliptical coordinates:
@@ -20,6 +20,7 @@ for iter in range(1):
     #JDE = 2451545.0 + iter*100
     dYear = iter*50
     JDE = 2451545.0 - dYear*365
+    eps = coord.obliquity(JDE)
     
     # Earth:
     HClonE,HClatE,HCradE = vsop.computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
@@ -35,7 +36,9 @@ for iter in range(1):
     
     # Compute geocentric ecliptical coordinates:
     lon,lat,rad = vsop.hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
-    print(iter,m.degrees(lon), m.degrees(lat),rad)
+    ra,dec = coord.ecl2eq(lon,lat, eps)
+    
+    print(iter,JDE, lon,lat,HCrad,rad, ra,dec)
     
     # Compute geocentric ecliptical coordinates:
     #lon1,lat1,rad1 = vsop.xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
