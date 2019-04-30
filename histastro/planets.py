@@ -1,4 +1,4 @@
-"""HistAstro VSOP87 functions"""
+"""HistAstro planet functions"""
 
 import math as m
 
