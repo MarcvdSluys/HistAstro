@@ -4,56 +4,37 @@
 import math as m
 import histastro.vsop as vsop
 import histastro.coordinates as coord
+import histastro.datetime as dt
+
+# Check obliquity:
+JD = dt.julianDay(1000,1,1)
+print(JD, m.degrees(coord.obliquity(JD)))
+JD = dt.julianDay(-3000,1,1)
+print(JD, m.degrees(coord.obliquity(JD)))
+    
+
 
 
 # Read VSOP data files for Earth and desired planet:
 lonTermsE,latTermsE,radTermsE = vsop.readVSOP('data/VSOP87D.ear')
 lonTerms,latTerms,radTerms = vsop.readVSOP('data/VSOP87D.jup')
-#lonTerms,latTerms,radTerms = vsop.readVSOP('data/VSOP87D.ura')
-
-#xTermsE,yTermsE,zTermsE = vsop.readVSOP('data/VSOP87C.ear')
-#xTerms,yTerms,zTerms = vsop.readVSOP('data/VSOP87C.jup')
-
 
 # Compute heliocentric ecliptical coordinates:
-for iter in range(1):
-    #JDE = 2451545.0 + iter*100
-    dYear = iter*50
-    JDE = 2451545.0 - dYear*365
-    eps = coord.obliquity(JDE)
+for month in range(1,4):
+    JD = dt.julianDay(-1000, month, 1)
+    eps = coord.obliquity(JD)
     
     # Earth:
-    HClonE,HClatE,HCradE = vsop.computeLBR(JDE, lonTermsE,latTermsE,radTermsE)
-    #HCxE,HCyE,HCzE = vsop.computeLBR(JDE, xTermsE,yTermsE,zTermsE)
-    #print(HClonE,HClatE,HCradE)
+    HClonE,HClatE,HCradE = vsop.computeLBR(JD, lonTermsE,latTermsE,radTermsE)
     
     # Planet:
-    HClon,HClat,HCrad = vsop.computeLBR(JDE, lonTerms,latTerms,radTerms)
-    #HCx,HCy,HCz = vsop.computeLBR(JDE, xTerms,yTerms,zTerms)
-    #print(HClon,HClat,HCrad)
+    HClon,HClat,HCrad = vsop.computeLBR(JD, lonTerms,latTerms,radTerms)
     
-    
-    
-    # Compute geocentric ecliptical coordinates:
+    # Compute geocentric ecliptical and equatorial coordinates:
     lon,lat,rad = vsop.hc2gc(HClonE,HClatE,HCradE, HClon,HClat,HCrad)
     ra,dec = coord.ecl2eq(lon,lat, eps)
     
-    print(iter,JDE, lon,lat,HCrad,rad, ra,dec)
+    print(month,JD, lon,lat,HCrad,rad, ra,dec)
     
-    # Compute geocentric ecliptical coordinates:
-    #lon1,lat1,rad1 = vsop.xyz_hc2lbr_gc(HCxE,HCyE,HCzE, HCx,HCy,HCz)
-    #print(iter, m.degrees(lon), m.degrees(lat), m.degrees(rad))
-    #print(iter, 2000-dYear, m.degrees(lon-lon1), m.degrees(lat-lat1), rad-rad1)  # ~3000 BCE: dl~3e-3d, db~3e-5d, dr~4e-4 AU
     
 
-# Check obliquity:
-JDE = 2448347.5000000000
-print(iter, 2000-dYear, JDE, m.degrees(coord.obliquity(JDE)))
-JDE = -1931442.5000000000
-print(iter, 2000-dYear, JDE, m.degrees(coord.obliquity(JDE)))
-    
-
-# Benchmark:
-# Starting script:                0.061   +- 0.003 s
-# Reading 2 VSOP files:           0.364   +- 0.006 s
-# Computing geocentric position:  0.00274 +- 0.00010 s
