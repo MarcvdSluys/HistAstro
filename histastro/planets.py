@@ -2,13 +2,15 @@
 
 import math as m
 import numpy.core as np
+import histastro.datetime as dt
+
+pi2 = m.pi*2
 
 def readVSOP(pl):
     """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file for planet pl (1-8)"""
     
     exts = ['mer','ven','ear','mar','jup','sat','ura','nep']
     fileName = 'data/VSOP87D.'+exts[pl-1]
-    print(fileName)
     inFile = open(fileName,'r')
     
     import fortranformat as ff
@@ -49,8 +51,8 @@ def computeLBR(JDE, lonTerms,latTerms,radTerms):
     for terms in radTerms:
         cosTerm = terms[1] * m.cos(terms[2] + terms[3]*Tjm)
         rad += cosTerm * Tjm**terms[0]
-        
-    return lon,lat,rad
+
+    return lon%pi2, lat, rad
 
 
 # Convert from heliocentric spherical to rectangular coordinates, and take the difference (i.e., geocentric
@@ -116,13 +118,16 @@ def plMagn(pl, distPS, distPE, distSE):
     return mag
     
 
-def satMagn(JD, lon,lat):
+def satRingMagn(JD, lon,lat):
     """Compute the magnitude of Saturn's rings from the JD and Saturns geocentric, ecliptical coordinates (in rad)"""
+    tJC = dt.jd2tjc(JD)  # Time since 2000 in Julian centuries
+    
     incl = 0.49                # Inclination of Saturn's rotation axis (rad)
     ascNod = 2.96 + 0.024*tJC  # Ascending node of Saturn's orbit (rad)
     
     sinB = np.sin(incl) * np.cos(lat) * np.sin(lon-ascNod)  -  np.cos(incl) * np.sin(lat)
-    satMagn = -2.60*abs(sinB) + 1.25*(sinB)**2
+    satRingMagn = -2.60*abs(sinB) + 1.25*(sinB)**2
     
+    return satRingMagn
     #  As is: mean abs. dev. from full expression: 0.014m, max: 0.041m (10^5 trials, last 5ka)  (using phi iso DeltaU)
     

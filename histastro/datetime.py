@@ -20,3 +20,8 @@ def julianDay(year,month,day):
     jd = m.floor(365.25*(year+4716)) + m.floor(30.6001*(month+1)) + day + b - 1524.5
     return jd
 
+
+def jd2tjc(jd):
+    """Return the time since 2000 expressed in Julian centuries"""
+    
+    return (jd - 2451545.0)/36525
