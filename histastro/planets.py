@@ -1,10 +1,14 @@
 """HistAstro planet functions"""
 
 import math as m
+import numpy.core as np
 
-def readVSOP(fileName):
-    """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file"""
-
+def readVSOP(pl):
+    """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file for planet pl (1-8)"""
+    
+    exts = ['mer','ven','ear','mar','jup','sat','ura','nep']
+    fileName = 'data/VSOP87D.'+exts[pl-1]
+    print(fileName)
     inFile = open(fileName,'r')
     
     import fortranformat as ff
@@ -94,4 +98,31 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
     return lon,lat,rad
 
 
+def plMagn(pl, distPS, distPE, distSE):
+    """Compute the magnitude of planet pl (1-2, 4-9)  -  Expl.Suppl.tt.Astr.Almanac 3rd Ed, Table 10.6, p.413 + errata!"""
 
+    #               Mer    Ven1   Ven2   Mars   Jup    Sat    Ur     Nep    Pl
+    a0 = np.array([-0.60, -4.47,  0.98, -1.52, -9.40, -8.88, -7.19, -6.87, -1.01])
+    a1 = np.array([ 4.98,  1.03, -1.02,   1.6,   0.5,   4.4,   0.2,     0,     0]) * 1e-2
+    a2 = np.array([-4.88,  0.57,     0,     0,     0,     0,     0,     0,     0]) * 1e-4
+    a3 = np.array([ 3.02,  0.13,     0,     0,     0,     0,     0,     0,     0]) * 1e-6
+    
+    phAng = np.degrees( np.arccos( (distPS**2 + distPE**2 - distSE**2) / (2*distPS*distPE) ) )  # Phase angle (deg!)
+    
+    if(pl==2 and phAng>163.6): pl = 3  # Venus 2
+    pl = pl-1  # 1-9 -> 0-8
+    
+    mag = 5*np.log10(distPS*distPE) + a0[pl] + a1[pl]*phAng + a2[pl]*phAng**2 + a3[pl]*phAng**3
+    return mag
+    
+
+def satMagn(JD, lon,lat):
+    """Compute the magnitude of Saturn's rings from the JD and Saturns geocentric, ecliptical coordinates (in rad)"""
+    incl = 0.49                # Inclination of Saturn's rotation axis (rad)
+    ascNod = 2.96 + 0.024*tJC  # Ascending node of Saturn's orbit (rad)
+    
+    sinB = np.sin(incl) * np.cos(lat) * np.sin(lon-ascNod)  -  np.cos(incl) * np.sin(lat)
+    satMagn = -2.60*abs(sinB) + 1.25*(sinB)**2
+    
+    #  As is: mean abs. dev. from full expression: 0.014m, max: 0.041m (10^5 trials, last 5ka)  (using phi iso DeltaU)
+    
