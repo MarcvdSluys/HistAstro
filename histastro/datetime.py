@@ -25,3 +25,11 @@ def jd2tjc(jd):
     """Return the time since 2000 expressed in Julian centuries"""
     
     return (jd - 2451545.0)/36525
+
+
+def jd2tjm(jd):
+    """Return the time since 2000 expressed in Julian millennia"""
+    
+    return (jd - 2451545.0)/365250
+
+

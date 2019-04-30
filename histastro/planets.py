@@ -38,8 +38,8 @@ def readVSOP(pl):
 
 
 # Compute heliocentric ecliptical coordinates from periodic terms
-def computeLBR(JDE, lonTerms,latTerms,radTerms):
-    Tjm = (JDE - 2451545.0)/365250.0
+def computeLBR(jde, lonTerms,latTerms,radTerms):
+    Tjm = dt.jd2tjm(jde)  # Time since 2000 in Julian millennia
     
     lon=0.0; lat=0.0; rad=0.0
     for terms in lonTerms:
