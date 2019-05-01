@@ -9,6 +9,8 @@ d2r = m.radians(1)  # Degrees to radians
 r2d = m.degrees(1)  # Radians to degrees
 r2as = r2d*3600     # Radians to arcseconds
 pi = m.pi
+pi2 = pi*2
+pio2 = pi/2
 jd2000 = 2451545
 
 # Global variable
@@ -25,14 +27,15 @@ def elp_mpp02_initialise_and_read_files(mode):
     #print*,mode,modeInit
     if(mode!=modeInit):
         w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5 = elp_mpp02_initialise(mode)
-        ierr = elp_mpp02_read_files()
+        ierr = elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
         print("init_and_read ierr:", ierr)
         if(ierr!=0): return ierr
         
         modeInit = mode
         print("modeInit:", modeInit)
+        return ierr,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
         
-    return ierr  #,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    return ierr
 #***************************************************************************************************
 
 
@@ -278,77 +281,106 @@ def elp_mpp02_initialise(mode):
 ## - module elp_mpp02_constants:  Set of the constants of ELP/MPP02 solution (input)
 ## - module elp_mpp02_series:  Series of the ELP/MPP02 solution (output)
   
-def elp_mpp02_read_files():
+def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5):
     print("Read files:")
     #use TheSky_elp_mpp02_series, only: cmpb,fmpb,nmpb,   cper,fper,nper
     #use TheSky_elp_mpp02_constants, only: zeta,dela,   p,delnu,dele,delg,delnp,delep,dtasm,am
     
     #integer :: ilu(4),ifi(16)
-    #real(double) :: b(5)
+
+    # Global variables?:
+    nmpb = np.zeros((4,4))  # nmpb(3,3)
+    cmpb = np.zeros(2646)   # cmpb(max1), max1 = 2645
+    fmpb = np.zeros((5,2646))  # fmpb(0:4,max1)
+    nper = np.zeros((4,4,4))  # nper(3,0:3,3)
+    cper = np.zeros(33257)    #  cper(max2), max2=33256
+    fper = np.zeros((5,33257))  # fper(0:4,max2)
+    
     
     # Read the Main Problem series:
     ir=0
-    nmpb=0
-    ierr=1
+    
+    ilu = np.zeros(5)  # int(!) ilu(4)
+    a = 0.
+    b = np.zeros(6)  # double b(5)
+    #ierr=1
     nerr=0
     
     # Name of the (here single) ELPMPP02 file:
-    inFile = 'data/elp_mpp02.dat'
-    #inquire(file=trim(inFile), exist=fexist)
-    #if(not fexist) file_open_error_quit(trim(inFile), 1, 1)  # 1: input file
+    fileName = 'data/elp_mpp02.dat'
+    inFile = open(fileName,'r')
+    #inquire(file=trim(fileName), exist=fexist)
+    #if(not fexist) file_open_error_quit(trim(fileName), 1, 1)  # 1: input file
     
+    import fortranformat as ff
+    formatMainHeader = ff.FortranRecordReader('(25x,I10)')              # Block header format
+    formatMainBody   = ff.FortranRecordReader('(4I3,2x,F13.5,5F12.2)')  # Block body format
     
-    #call find_free_io_unit(ip)
-    #open(ip,file=trim(inFile),status='old',iostat=nerr)
     
     for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
-       ierr=3
-       #read(ip,'(25x,I10)', iostat=nerr,end=100) nmpb(iFile,1)
-       nmpb = np.zeros((4,4))  # nmpb(3,3)
-       if(nerr!=0): return ierr
-       
-       nmpb[iFile,2] = ir+1
-       nmpb[iFile,3] = nmpb[iFile,1] + nmpb[iFile,2] - 1
-       
-       for iLine in range(1, int(round(nmpb[iFile,1]))+1):  # do iLine=1,nmpb(iFile,1)
-          ierr=4
-          #read(ip,'(4I3,2x,F13.5,5F12.2)', iostat=nerr,end=100) ilu,a,b
-          if(nerr!=0): return ierr
-          
-          ir=ir+1
-          tgv = b(1) + dtasm*b(5)
-          if(iFile==3):  a -= 2*a*delnu/3
-          cmpb[ir] = a + tgv*(delnp-am*delnu) + b[2]*delg + b[3]*dele + b[4]*delep
-          
-          for k in range(5):  # do k=0,4
-             fmpb[k,ir] = 0
-             for i in range(1,5):  # do i=1,4
-                fmpb[k,ir] += ilu[i] * dela[i,k]
-          
-          if(iFile==3): fmpb[0,ir] += pio2
+        line = inFile.readline()
+        nmpb[iFile,1] = formatMainHeader.read(line)[0]
+        #print(nmpb[iFile,1])
+        #if(nerr!=0): return 3
+        
+        nmpb[iFile,2] = ir+1
+        nmpb[iFile,3] = nmpb[iFile,1] + nmpb[iFile,2] - 1
+        
+        for iLine in range(1, int(round(nmpb[iFile,1]))+1):  # do iLine=1,nmpb(iFile,1)
+            line = inFile.readline()
+            ilu[1],ilu[2],ilu[3],ilu[4], a, b[1],b[2],b[3],b[4],b[5] = formatMainBody.read(line)
+            #print(iFile,iLine, "   ", ilu, a, b)
+            #if(nerr!=0): return 4
+            
+            ir=ir+1
+            tgv = b[1] + dtasm*b[5]
+            if(iFile==3):  a -= 2*a*delnu/3
+            cmpb[ir] = a + tgv*(delnp-am*delnu) + b[2]*delg + b[3]*dele + b[4]*delep
+            
+            for k in range(5):  # do k=0,4
+                fmpb[k,ir] = 0
+                for i in range(1,5):  # do i=1,4
+                    fmpb[k,ir] += ilu[i] * dela[i,k]
+                    
+                    if(iFile==3): fmpb[0,ir] += pio2
+
     
     # Read the Perturbations series:
     ir=0
+    ipt = 0
+    icount = 0
+    s = 0.0
+    c = 0.0
+    ifi = np.zeros(17)  # int ifi(16)
     nper = np.zeros((4,4,4))  # nper(3,0:3,3)
     
+    formatPertHeader = ff.FortranRecordReader('(25x,2I10)')         # Perturbation header format
+    formatPertBody   = ff.FortranRecordReader('(I5,2D20.13,16I3)')  # Perturbation body format
+    
     for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
-        for it in range(4):  # do it=0,3
+        for it in range(4):   # do it=0,3
             #read(ip,'(25x,2I10)', iostat=nerr,end=100) nper(iFile,it,1),ipt
-            ierr = 6
-            if(nerr!=0): return ierr
+            #if(nerr!=0): return 6
+            line = inFile.readline()
+            #print(line)
+            nper[iFile,it,1],ipt = formatPertHeader.read(line)
+            #print(iFile,iLine, "   ", nper[iFile,it,1],ipt)
             
             nper[iFile,it,2] = ir+1
             nper[iFile,it,3] = nper[iFile,it,1] + nper[iFile,it,2] - 1
             if(nper[iFile,it,1]==0): continue  # cycle
             
-            for iLine in range(1, nper[iFile,it,1]+1):  # do iLine=1,nper(iFile,it,1)
+            nLines = int(round(nper[iFile,it,1]))
+            for iLine in range(1, nLines+1):  # do iLine=1,nper(iFile,it,1)
                 #read(ip,'(I5,2D20.13,16I3)', iostat=nerr,end=100) icount,s,c,ifi
-                ierr = 7
-                if(nerr!=0): return ierr
+                #if(nerr!=0): return 7
+                line = inFile.readline()
+                icount,s,c,ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10],ifi[11],ifi[12],ifi[13],ifi[14],ifi[15],ifi[16] = formatPertBody.read(line)
+                #if(iLine==1 or iLine==nLines): print(iFile,iLine, "     ", icount,s,c,ifi)
                 
                 ir = ir+1
-                cper[ir] = sqrt(c**2+s**2)
-                pha = atan2(c,s)
+                cper[ir] = m.sqrt(c**2+s**2)
+                pha = m.atan2(c,s)
                 if(pha<0): pha = pha+pi2
                 
                 for k in range(5):  # do k=0,4
@@ -362,7 +394,7 @@ def elp_mpp02_read_files():
                     
                     fper[k,ir] += ifi[13] * zeta[k]
                 
-    #close(ip)
+    inFile.close()
     
     # Exit:
     ierr=0
