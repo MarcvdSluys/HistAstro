@@ -9,20 +9,30 @@ d2r = m.radians(1)  # Degrees to radians
 r2d = m.degrees(1)  # Radians to degrees
 r2as = r2d*3600     # Radians to arcseconds
 pi = m.pi
+jd2000 = 2451545
+
+# Global variable
+modeInit = 999  # := uninitialised
 
 #***************************************************************************************************
-def elp_mpp02_initialise_and_read_files(mode, ierr):
+def elp_mpp02_initialise_and_read_files(mode):
+    global modeInit
+    print("Initialise and read files:", modeInit)
     #integer, save :: modeInit = 999       # Test whether data have been initialised
     
     # Initializing of constants and reading the files:
     ierr = 0
     #print*,mode,modeInit
     if(mode!=modeInit):
-        elp_mpp02_initialise(mode)
-        elp_mpp02_read_files(ierr)
-        if(ierr!=0): return
+        w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5 = elp_mpp02_initialise(mode)
+        ierr = elp_mpp02_read_files()
+        print("init_and_read ierr:", ierr)
+        if(ierr!=0): return ierr
         
         modeInit = mode
+        print("modeInit:", modeInit)
+        
+    return ierr  #,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
 #***************************************************************************************************
 
 
@@ -55,6 +65,8 @@ def elp_mpp02_initialise_and_read_files(mode, ierr):
 ##   - ELPdoc: Lunar solution ELP, version ELP/MPP02,  Jean Chapront and Gerard Francou, October 2002
 
 def elp_mpp02_initialise(mode):
+    global modeInit
+    print("Initialise:", modeInit)
     #use TheSky_elp_mpp02_constants, only: w,eart,peri, zeta,dela,   p,delnu,dele,delg,delnp,delep,dtasm,am,   p1,p2,p3,p4,p5,q1,q2,q3,q4,q5
     
     #real(double) :: bp(5,2)
@@ -239,20 +251,20 @@ def elp_mpp02_initialise(mode):
     
     # Precession of the longitude of the ascending node of the mean ecliptic of date on fixed ecliptic J2000 (Laskar, 1986):
     # P: sine coefficients:
-    p1 =  0.10180391e-04
-    p2 =  0.47020439e-06
-    p3 = -0.5417367e-09
+    p1 =  0.10180391e-4
+    p2 =  0.47020439e-6
+    p3 = -0.5417367e-9
     p4 = -0.2507948e-11
     p5 =  0.463486e-14
     
     # Q: cosine coefficients:
-    q1 = -0.113469002e-03
-    q2 =  0.12372674e-06
-    q3 =  0.1265417e-08
+    q1 = -0.113469002e-3
+    q2 =  0.12372674e-6
+    q3 =  0.1265417e-8
     q4 = -0.1371808e-11
     q5 = -0.320334e-14
     
-    return w,eart,peri, zeta,dela,   p,delnu,dele,delg,delnp,delep,dtasm,am,   p1,p2,p3,p4,p5,q1,q2,q3,q4,q5
+    return w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
 #***************************************************************************************************
   
   
@@ -267,6 +279,7 @@ def elp_mpp02_initialise(mode):
 ## - module elp_mpp02_series:  Series of the ELP/MPP02 solution (output)
   
 def elp_mpp02_read_files():
+    print("Read files:")
     #use TheSky_elp_mpp02_series, only: cmpb,fmpb,nmpb,   cper,fper,nper
     #use TheSky_elp_mpp02_constants, only: zeta,dela,   p,delnu,dele,delg,delnp,delep,dtasm,am
     
@@ -277,28 +290,30 @@ def elp_mpp02_read_files():
     ir=0
     nmpb=0
     ierr=1
+    nerr=0
     
     # Name of the (here single) ELPMPP02 file:
-    filename = trim(TheSkydir)//'elp_mpp02.dat'
-    #inquire(file=trim(filename), exist=fexist)
-    #if(not fexist) file_open_error_quit(trim(filename), 1, 1)  # 1: input file
+    inFile = 'data/elp_mpp02.dat'
+    #inquire(file=trim(inFile), exist=fexist)
+    #if(not fexist) file_open_error_quit(trim(inFile), 1, 1)  # 1: input file
     
     
     #call find_free_io_unit(ip)
-    #open(ip,file=trim(filename),status='old',iostat=nerr)
+    #open(ip,file=trim(inFile),status='old',iostat=nerr)
     
-    for iFile in range(3)+1:  # do iFile=1,3  # These used to be three files
+    for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
        ierr=3
        #read(ip,'(25x,I10)', iostat=nerr,end=100) nmpb(iFile,1)
-       if(nerr!=0): return
+       nmpb = np.zeros((4,4))  # nmpb(3,3)
+       if(nerr!=0): return ierr
        
        nmpb[iFile,2] = ir+1
        nmpb[iFile,3] = nmpb[iFile,1] + nmpb[iFile,2] - 1
        
-       for iLine in range(nmpb[iFile,1]):  # do iLine=1,nmpb(iFile,1)
+       for iLine in range(1, int(round(nmpb[iFile,1]))+1):  # do iLine=1,nmpb(iFile,1)
           ierr=4
           #read(ip,'(4I3,2x,F13.5,5F12.2)', iostat=nerr,end=100) ilu,a,b
-          if(nerr!=0): return
+          if(nerr!=0): return ierr
           
           ir=ir+1
           tgv = b(1) + dtasm*b(5)
@@ -307,29 +322,29 @@ def elp_mpp02_read_files():
           
           for k in range(5):  # do k=0,4
              fmpb[k,ir] = 0
-             for i in range(4)+1:  # do i=1,4
+             for i in range(1,5):  # do i=1,4
                 fmpb[k,ir] += ilu[i] * dela[i,k]
           
           if(iFile==3): fmpb[0,ir] += pio2
     
     # Read the Perturbations series:
     ir=0
-    nper = 0
+    nper = np.zeros((4,4,4))  # nper(3,0:3,3)
     
-    for iFile in range(3)+1:  # do iFile=1,3  # These used to be three files
+    for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
         for it in range(4):  # do it=0,3
             #read(ip,'(25x,2I10)', iostat=nerr,end=100) nper(iFile,it,1),ipt
             ierr = 6
-            if(nerr!=0): return
+            if(nerr!=0): return ierr
             
             nper[iFile,it,2] = ir+1
             nper[iFile,it,3] = nper[iFile,it,1] + nper[iFile,it,2] - 1
             if(nper[iFile,it,1]==0): continue  # cycle
             
-            for iLine in range(nper[iFile,it,1]):  # do iLine=1,nper(iFile,it,1)
+            for iLine in range(1, nper[iFile,it,1]+1):  # do iLine=1,nper(iFile,it,1)
                 #read(ip,'(I5,2D20.13,16I3)', iostat=nerr,end=100) icount,s,c,ifi
                 ierr = 7
-                if(nerr!=0): return
+                if(nerr!=0): return ierr
                 
                 ir = ir+1
                 cper[ir] = sqrt(c**2+s**2)
@@ -339,19 +354,19 @@ def elp_mpp02_read_files():
                 for k in range(5):  # do k=0,4
                     fper[k,ir] = 0
                     if(k==0): fper[k,ir] = pha
-                    for i in range(4)+1:  # do i=1,4
+                    for i in range(1,5):  # do i=1,4
                         fper[k,ir] += ifi[i] * dela[i,k]
                         
-                    for i in range(8)+5:  # do i=5,12
+                    for i in range(5,13):  # do i=5,12
                         fper[k,ir] += ifi[i] * p[i-4,k]
                     
                     fper[k,ir] += ifi[13] * zeta[k]
                 
-    close(ip)
+    #close(ip)
     
     # Exit:
     ierr=0
-    return
+    return ierr
     
     # End of file error:
 # 100 continue
@@ -383,18 +398,19 @@ def elp_dms2rad(deg,min,sec):
 ## \retval  rad  Distance (AU)
 
 def elp_mpp02_lbr(jd, mode):
+    print("Compute lbr:")
     #real(double) :: xyz(3),vxyz(3)
     
-    elp_mpp02_xyz(jd, mode, xyz,vxyz, ierr)
+    xyz,vxyz, ierr = elp_mpp02_xyz(jd, mode)
     
     # Compute ecliptic l,b,r:
-    rad = sqrt(sum(xyz**2))
-    lon = atan2(xyz(2),xyz(1))
-    lat = asin(xyz(3)/rad)
+    rad = m.sqrt(sum(xyz**2))
+    lon = m.atan2(xyz[2], xyz[1])
+    lat = m.asin(xyz[3]/rad)
     
     # precess_ecl(jd2000,jd, lon,lat)
     
-    rad = rad*km/au  # km -> AU
+    rad = rad/1.49597870700e8  # km -> AU
     
     #write(*,'(/, F20.5, 2F14.7,F14.5)') jd, rev(lon)*r2d, lat*r2d, rad
     return lon,lat,rad
@@ -444,6 +460,7 @@ def elp_mpp02_lbr(jd, mode):
 ##      elp82b_lbr() above is known to underperform (by a factor of 10) in accuracy.
   
 def elp_mpp02_xyz(jd, mode):
+    print("Compute xyz:")
     #use TheSky_elp_mpp02_series, only: cmpb,fmpb,nmpb,   cper,fper,nper
     #use TheSky_elp_mpp02_constants, only: w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
     
@@ -452,6 +469,15 @@ def elp_mpp02_xyz(jd, mode):
     aelp=384747.980674318
     sc=36525  # Moon mean distance for DE405 und ELP; Julian century in days
     
+    # Global variables?
+    nmpb = np.zeros((4,4))  # nmpb(3,3)
+    cmpb = np.zeros(2646)   # cmpb(max1), max1 = 2645
+    fmpb = np.zeros((5,2646))  # fmpb(0:4,max1)
+    nper = np.zeros((4,4,4))  # nper(3,0:3,3)
+    cper = np.zeros(33257)    #  cper(max2), max2=33256
+    fper = np.zeros((5,33257))  # fper(0:4,max2)
+    w = np.zeros((4,5))  # w(3,0:4)
+    p1=0; p2=0; p3=0; p4=0; p5=0;  q1=0; q2=0; q3=0; q4=0; q5=0;
     #real(double) :: rjd, t(-1:4),v(6)
     
     # Initialise data and read files if needed:
@@ -461,6 +487,7 @@ def elp_mpp02_xyz(jd, mode):
     
     # Initialization of time powers:
     rjd  = jd - jd2000  # Reduced JD - JD since 2000
+    t = np.zeros(5)  # t(-1:4) - -1 used to prevent compiler warnings?
     t[0] = 1
     t[1] = rjd/sc       # t: time since 2000 in Julian centuries
     t[2] = t[1]**2      # t^2
@@ -468,12 +495,13 @@ def elp_mpp02_xyz(jd, mode):
     t[4] = t[2]**2      # t^4
     
     # Evaluation of the series: substitution of time in the series
+    v = np.zeros(7)  # v(6)
     for iVar in range(1,4):  # do iVar=1,3  # iVar=1,2,3: Longitude, Latitude, Distance
         v[iVar] = 0
         v[iVar+3] = 0
         
         # Main Problem series:
-        for iLine in range(nmpb[iVar,2], nmpb[iVar,3]+1):  # do iLine=nmpb(iVar,2),nmpb(iVar,3)
+        for iLine in range(int(round(nmpb[iVar,2])), int(round(nmpb[iVar,3]))+1):  # do iLine=nmpb(iVar,2),nmpb(iVar,3)
             x = cmpb[iLine]
             y = fmpb[0,iLine]
             yp = 0
@@ -482,13 +510,13 @@ def elp_mpp02_xyz(jd, mode):
                 y  = y  +   fmpb[k,iLine] * t[k]
                 yp = yp + k*fmpb[k,iLine] * t[k-1]
           
-            v[iVar]   = v[iVar]   + x*sin(y)
-            v[iVar+3] = v[iVar+3] + x*yp*cos(y)
+            v[iVar]   = v[iVar]    +  x * m.sin(y)
+            v[iVar+3] = v[iVar+3]  +  x *yp * m.cos(y)
             
             
         # Perturbations series:
         for it in range(4):  # do it=0,3
-            for iLine in range(nper[iVar,it,2], nper[iVar,it,3]+1):  # do iLine=nper(iVar,it,2),nper(iVar,it,3)
+            for iLine in range(int(round(nper[iVar,it,2])), int(round(nper[iVar,it,3]))+1):  # do iLine=nper(iVar,it,2),nper(iVar,it,3)
                 x = cper[iLine]
                 y = fper[0,iLine]
                 xp = 0
@@ -499,8 +527,8 @@ def elp_mpp02_xyz(jd, mode):
                     y +=  fper[k,iLine] * t[k]
                     yp += k * fper[k,iLine] * t[k-1]
              
-            v[iVar] += x * t[it] * sin(y)
-            v[iVar+3] += xp * sin(y) + x * t[it] * yp * cos(y)
+            v[iVar] += x * t[it] * m.sin(y)
+            v[iVar+3] += xp * m.sin(y) + x * t[it] * yp * m.cos(y)
     
     # Compute the spherical coordinates for the mean inertial ecliptic and equinox of date:
     v[1]   = v[1]/r2as + w[1,0] + w[1,1]*t[1] + w[1,2]*t[2] + w[1,3]*t[3] + w[1,4]*t[4]  # Longitude + mean longitude (rad)
@@ -515,10 +543,10 @@ def elp_mpp02_xyz(jd, mode):
     
     
     # Compute the rectangular coordinates (for the EoD?):
-    clamb  = cos(v[1])
-    slamb  = sin(v[1])
-    cbeta  = cos(v[2])
-    sbeta  = sin(v[2])
+    clamb  = m.cos(v[1])
+    slamb  = m.sin(v[1])
+    cbeta  = m.cos(v[2])
+    sbeta  = m.sin(v[2])
     cw     = v[3]*cbeta
     sw     = v[3]*sbeta
     
@@ -530,13 +558,14 @@ def elp_mpp02_xyz(jd, mode):
     pw     = (p1 + p2*t[1] + p3*t[2] + p4*t[3] + p5*t[4]) * t[1]
     qw     = (q1 + q2*t[1] + q3*t[2] + q4*t[3] + q5*t[4]) * t[1]
     
-    ra     = 2*sqrt(1 - pw**2 - qw**2)
+    ra     = 2*m.sqrt(1 - pw**2 - qw**2)
     pwqw   = 2*pw*qw
     pw2    = 1 - 2*pw**2
     qw2    = 1 - 2*qw**2
     pwra   = pw*ra
     qwra   = qw*ra
     
+    xyz = np.zeros(4)  # xyz(3)
     xyz[1] =  pw2*x1  + pwqw*x2 + pwra*x3
     xyz[2] =  pwqw*x1 + qw2*x2  - qwra*x3
     xyz[3] = -pwra*x1 + qwra*x2 + (pw2+qw2-1)*x3
@@ -563,6 +592,7 @@ def elp_mpp02_xyz(jd, mode):
     ppwra  = ppw*ra + pw*rap
     qpwra  = qpw*ra + qw*rap
     
+    vxyz = np.zeros(4)  # vxyz(3)
     vxyz[1] = (pw2*xp1 + pwqw*xp2 + pwra*xp3  +  ppw2*x1 + ppwqpw*x2 + ppwra*x3) / sc
     vxyz[2] = (pwqw*xp1 + qw2*xp2 - qwra*xp3  +  ppwqpw*x1 + qpw2*x2 - qpwra*x3) / sc
     vxyz[3] = (-pwra*xp1 + qwra*xp2 + (pw2+qw2-1)*xp3  -  ppwra*x1 + qpwra*x2 + (ppw2+qpw2)*x3) / sc
