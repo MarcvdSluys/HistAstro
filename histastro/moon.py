@@ -286,6 +286,9 @@ def elp_mpp02_initialise(mode):
 ## \note
 ## - module elp_mpp02_constants:  Set of the constants of ELP/MPP02 solution (input)
 ## - module elp_mpp02_series:  Series of the ELP/MPP02 solution (output)
+##
+## \see
+## - Data files: ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/
   
 def elp_mpp02_read_files():
     print("Read files:")
@@ -293,24 +296,22 @@ def elp_mpp02_read_files():
     global w,eart,peri, dela,zeta,  p,delnu,dele,delg,delnp,delep,dtasm,am
     
     # Read the Main Problem series:
-    ir=0
+    ir  = 0
     ilu = np.zeros(4)  # will contain ints
-    a = 0.
-    b = np.zeros(5)
+    a   = 0.
+    b   = np.zeros(5)
     #ierr=1
     #nerr=0
-    
-    # Name of the (here single) ELPMPP02 file:
-    fileName = 'data/elp_mpp02.dat'
-    inFile = open(fileName,'r')
-    #if(not fexist) file_open_error_quit(trim(fileName), 1, 1)  # 1: input file
     
     import fortranformat as ff
     formatMainHeader = ff.FortranRecordReader('(25x,I10)')              # Block header format
     formatMainBody   = ff.FortranRecordReader('(4I3,2x,F13.5,5F12.2)')  # Block body format
     
     
-    for iFile in range(3):  # These used to be three files
+    for iFile in range(3):  # Main-problem files 1-3
+        fileName = 'data/ELP_MAIN.S'+str(iFile+1)
+        inFile = open(fileName,'r')
+        
         line = inFile.readline()
         nmpb[iFile,0] = formatMainHeader.read(line)[0]
         #if(nerr!=0): return 3
@@ -335,7 +336,9 @@ def elp_mpp02_read_files():
                     
             if(iFile==2): fmpb[0,ir] += pio2
             ir += 1
-        
+            
+        inFile.close()
+
     
     # Read the Perturbations series:
     ir=0
@@ -348,7 +351,9 @@ def elp_mpp02_read_files():
     formatPertHeader = ff.FortranRecordReader('(25x,2I10)')         # Perturbation header format
     formatPertBody   = ff.FortranRecordReader('(I5,2D20.13,16I3)')  # Perturbation body format
     
-    for iFile in range(3):  # These used to be three files
+    for iFile in range(3):  # Perturbation files 1-3
+        fileName = 'data/ELP_PERT.S'+str(iFile+1)
+        inFile = open(fileName,'r')
         for it in range(4):
             #if(nerr!=0): return 6
             line = inFile.readline()
@@ -379,9 +384,9 @@ def elp_mpp02_read_files():
                     
                     fper[k,ir] += ifi[12] * zeta[k]
                 ir = ir+1
-                
-    inFile.close()
-    
+            
+        inFile.close()        
+        
     return 0
     
 #***************************************************************************************************
