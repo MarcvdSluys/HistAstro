@@ -17,11 +17,11 @@ jd2000 = 2451545
 modeInit = 999  # := uninitialised
 
 nmpb = np.zeros((3,3))      # nmpb(3,3)
-cmpb = np.zeros(2646)       # cmpb(max1), max1 = 2645
-fmpb = np.zeros((5,2646))   # fmpb(0:4,max1)
+cmpb = np.zeros(2645)       # cmpb(max1), max1 = 2645
+fmpb = np.zeros((5,2645))   # fmpb(0:4,max1)
 nper = np.zeros((3,4,3))    # nper(3,0:3,3)
-cper = np.zeros(33257)      # cper(max2), max2=33256
-fper = np.zeros((5,33257))  # fper(0:4,max2)
+cper = np.zeros(33256)      # cper(max2), max2=33256
+fper = np.zeros((5,33256))  # fper(0:4,max2)
 
 w    = np.zeros((4,5))      # w(1:3,0:4)
 p1=0.;p2=0.;p3=0.;p4=0.;p5=0.;  q1=0.;q2=0.;q3=0.;q4=0.;q5=0.
@@ -295,7 +295,6 @@ def elp_mpp02_read_files():
     
     # Read the Main Problem series:
     ir=0
-    
     ilu = np.zeros(5)  # int(!) ilu(4)
     a = 0.
     b = np.zeros(6)  # double b(5)
@@ -326,7 +325,6 @@ def elp_mpp02_read_files():
             ilu[1],ilu[2],ilu[3],ilu[4], a, b[1],b[2],b[3],b[4],b[5] = formatMainBody.read(line)
             #if(nerr!=0): return 4
             
-            ir += 1
             tgv = b[1] + dtasm*b[5]
             if(iFile==2):  a -= 2*a*delnu/3
             cmpb[ir] = a + tgv*(delnp-am*delnu) + b[2]*delg + b[3]*dele + b[4]*delep
@@ -337,6 +335,7 @@ def elp_mpp02_read_files():
                     fmpb[k,ir] += ilu[i] * dela[i,k]
                     
             if(iFile==2): fmpb[0,ir] += pio2
+            ir += 1
         
     
     # Read the Perturbations series:
@@ -366,7 +365,6 @@ def elp_mpp02_read_files():
                 icount,s,c,ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10],ifi[11],ifi[12],ifi[13],ifi[14],ifi[15],ifi[16] = formatPertBody.read(line)
                 #if(nerr!=0): return 7
                 
-                ir = ir+1
                 cper[ir] = m.sqrt(c**2+s**2)
                 pha = m.atan2(c,s)
                 if(pha<0): pha = pha+pi2
@@ -381,6 +379,7 @@ def elp_mpp02_read_files():
                         fper[k,ir] += ifi[i] * p[i-4,k]
                     
                     fper[k,ir] += ifi[13] * zeta[k]
+                ir = ir+1
                 
     inFile.close()
     
@@ -483,7 +482,7 @@ def elp_mpp02_xyz(jd, mode):
         # Main Problem series:
         nLineStart = int(round(nmpb[iVar,1]))
         nLineEnd   = int(round(nmpb[iVar,2]))
-        for iLine in range(nLineStart, nLineEnd+1):  # do iLine=nmpb(iVar,2),nmpb(iVar,3)
+        for iLine in range(nLineStart-1, nLineEnd):  # do iLine=nmpb(iVar,2),nmpb(iVar,3)
             x = cmpb[iLine]
             y = fmpb[0,iLine]
             yp = 0
@@ -500,7 +499,7 @@ def elp_mpp02_xyz(jd, mode):
         for it in range(4):  # do it=0,3
             nLineStart = int(round(nper[iVar,it,1]))
             nLineEnd   = int(round(nper[iVar,it,2]))
-            for iLine in range(nLineStart, nLineEnd+1):  # do iLine=nper(iVar,it,2),nper(iVar,it,3)
+            for iLine in range(nLineStart-1, nLineEnd):  # do iLine=nper(iVar,it,2),nper(iVar,it,3)
                 x = cper[iLine]
                 y = fper[0,iLine]
                 xp = 0
@@ -520,7 +519,7 @@ def elp_mpp02_xyz(jd, mode):
     v[1]   = v[1]/r2as                                                                   # Latitude (rad)
     v[2]   = v[2] * a405 / aelp                                                          # Distance (km)
     
-    v[0] = v[0] % pi2
+    # v[0] = v[0] % pi2
     
     print('t: ', t[0],t[1],t[2],t[3],t[4])
     print('v:       ', v[0]*r2d,v[1]*r2d,v[2], v[3],v[4],v[5])
