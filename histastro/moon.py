@@ -296,7 +296,7 @@ def elp_mpp02_read_files():
     ir=0
     ilu = np.zeros(4)  # will contain ints
     a = 0.
-    b = np.zeros(6)  # double b(5)
+    b = np.zeros(5)  # double b(5)
     #ierr=1
     #nerr=0
     
@@ -321,12 +321,12 @@ def elp_mpp02_read_files():
         nLines = int(round(nmpb[iFile,0]))
         for iLine in range(1, nLines+1):  # do iLine=1,nmpb(iFile,1)
             line = inFile.readline()
-            ilu[0],ilu[1],ilu[2],ilu[3], a, b[1],b[2],b[3],b[4],b[5] = formatMainBody.read(line)
+            ilu[0],ilu[1],ilu[2],ilu[3], a, b[0],b[1],b[2],b[3],b[4] = formatMainBody.read(line)
             #if(nerr!=0): return 4
             
-            tgv = b[1] + dtasm*b[5]
+            tgv = b[0] + dtasm*b[4]
             if(iFile==2):  a -= 2*a*delnu/3
-            cmpb[ir] = a + tgv*(delnp-am*delnu) + b[2]*delg + b[3]*dele + b[4]*delep
+            cmpb[ir] = a + tgv*(delnp-am*delnu) + b[1]*delg + b[2]*dele + b[3]*delep
             
             for k in range(5):  # do k=0,4
                 fmpb[k,ir] = 0
