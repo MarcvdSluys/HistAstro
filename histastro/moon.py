@@ -5,12 +5,12 @@ import numpy.core as np
 import sys
 
 # Constants:
-d2r = m.radians(1)  # Degrees to radians
-r2d = m.degrees(1)  # Radians to degrees
-r2as = r2d*3600     # Radians to arcseconds
-pi = m.pi
-pi2 = pi*2
-pio2 = pi/2
+d2r    = m.radians(1)  # Degrees to radians
+r2d    = m.degrees(1)  # Radians to degrees
+r2as   = r2d*3600      # Radians to arcseconds
+pi     = m.pi
+pi2    = pi*2
+pio2   = pi/2
 jd2000 = 2451545
 
 # Global variables:
@@ -19,20 +19,19 @@ modeInit = 999  # := uninitialised
 nmpb = np.zeros((4,4))      # nmpb(3,3)
 cmpb = np.zeros(2646)       # cmpb(max1), max1 = 2645
 fmpb = np.zeros((5,2646))   # fmpb(0:4,max1)
-
 nper = np.zeros((4,4,4))    # nper(3,0:3,3)
 cper = np.zeros(33257)      # cper(max2), max2=33256
 fper = np.zeros((5,33257))  # fper(0:4,max2)
 
-w = np.zeros((4,5))         # w(1:3,0:4)
+w    = np.zeros((4,5))      # w(1:3,0:4)
 p1=0.;p2=0.;p3=0.;p4=0.;p5=0.;  q1=0.;q2=0.;q3=0.;q4=0.;q5=0.
 
 eart = np.zeros(5)
 peri = np.zeros(5)
+dela = np.zeros((5,5))      # del(1:4,0:4) - del is a keyword in Python
 zeta = np.zeros(5)
-dela = np.zeros((5,5))  # del(1:4,0:4) - del is a keyword in Python
 
-p = np.zeros((9,5))  # p(8,0:4)
+p = np.zeros((9,5))         # p(8,0:4)
 delnu=0.; dele=0.; delg=0.; delnp=0.; delep=0.; dtasm=0.; am=0.
 
 
@@ -87,7 +86,7 @@ def elp_mpp02_initialise_and_read_files(mode):
 ##   - ELPdoc: Lunar solution ELP, version ELP/MPP02,  Jean Chapront and Gerard Francou, October 2002
 
 def elp_mpp02_initialise(mode):
-    global modeInit,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    global modeInit,  w,eart,peri, dela,zeta,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
     print("Initialise:", modeInit)
     
     Dprec = -0.29965  # Constant for the correction to the constant of precession - source: IAU 2000A
@@ -164,7 +163,6 @@ def elp_mpp02_initialise(mode):
     
     # Earth-Moon (EMB) elements:
     # Te: mean longitude of EMB:
-    eart = np.zeros(5)
     eart[0] = elp_dms2rad(100,27,59.13885+Deart_0)    # Source: VSOP2000
     eart[1] = (129597742.29300 +Deart_1)/r2as         # Source: VSOP2000
     eart[2] =         -0.020200/r2as                  # Source: ELP
@@ -172,7 +170,6 @@ def elp_mpp02_initialise(mode):
     eart[4] =          0.15000e-6/r2as                  # Source: ELP
     
     # Pip: mean longitude of the perihelion of EMB:
-    peri = np.zeros(5)
     peri[0] = elp_dms2rad(102,56,14.45766+Dperi)      # Source: VSOP2000
     peri[1] =       1161.24342/r2as                   # Source: VSOP2000
     peri[2] =          0.529265/r2as                  # Source: VSOP2000
@@ -217,7 +214,6 @@ def elp_mpp02_initialise(mode):
     w[3,1] +=  Cw3_1/r2as
     
     # Arguments of Delaunay:
-    dela = np.zeros((5,5))  # Need [1:4,0:4] - del is a keyword in Python
     for iD in range(5):     # do iD=0,4
        dela[1,iD] = w[1,iD]  - eart[iD]                 # D   =  W1 - Te + 180 degrees
        dela[2,iD] = w[1,iD]  - w[3,iD]                  # F   =  W1 - W3
@@ -227,7 +223,6 @@ def elp_mpp02_initialise(mode):
     dela[1,0] = dela[1,0] + pi
     
     # Planetary arguments: mean longitudes for J2000 (from VSOP2000):
-    p = np.zeros((9,5))  # p(8,0:4)
     p[1,0] = elp_dms2rad(252, 15,  3.216919)         # Mercury
     p[2,0] = elp_dms2rad(181, 58, 44.758419)         # Venus
     p[3,0] = elp_dms2rad(100, 27, 59.138850)         # EMB (eart(0))
@@ -251,7 +246,6 @@ def elp_mpp02_initialise(mode):
     
     
     # Zeta: Mean longitude of the Moon W1 + Rate of precession (pt):
-    zeta = np.zeros(5)
     zeta[0] = w[1,0]
     zeta[1] = w[1,1] + (5029.0966+Dprec)/r2as
     zeta[2] = w[1,2]
@@ -297,7 +291,7 @@ def elp_mpp02_initialise(mode):
 def elp_mpp02_read_files():
     print("Read files:")
     global nmpb,cmpb,fmpb, nper,cper,fper
-    global w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    global w,eart,peri, dela,zeta,  p,delnu,dele,delg,delnp,delep,dtasm,am
     
     # Read the Main Problem series:
     ir=0
@@ -451,30 +445,12 @@ def elp_mpp02_lbr(jd, mode):
 ## \retval ierr  File error index - ierr=0: no error, ierr=1: file error
 ##
 ## \note
-##  - The subroutine elp_mpp02() uses two modules:
-##    - elp_mpp02_constants:  Constants of the solution ELP/MPP02 (input),
-##    - elp_mpp02_series:     Series of the solution ELP/MPP02 (input).
-##
 ##  - The nominal values of some constants have to be corrected.  There are two sets of corrections, which can be selected
 ##    using the parameter 'mode' (used in elp_mpp02_initialise()).
 ##    - mode=0, the constants are fitted to LLR observations provided from 1970 to 2001; it is the default value;
 ##    - mode=1, the constants are fitted to DE405 ephemeris over one century (1950-2060); the lunar angles W1, W2, W3
 ##              receive also additive corrections to the secular coefficients ('historical mode').
 ##    When the mode is changed, the data must be reinitialised and the data file reread.
-##
-##  - Solutions (discussed) in the paper:
-##    - ELP (original):
-##      - ELP2000-82: using VSOP82 (1983)
-##      - ELP2000-85: new mean lunar arguments, higher truncation level, longer time range (1988)
-##      - ELP2000-82B, here called "ELP": ELP2000-82, using mean lunar arguments from ELP2000-85 (19??)
-##    - ELP/MPP01:  using latest planetary perturbations from MPP01 and VSOP2000, but simpler than MPP01
-##    - ELP/MPP02:  ELP/MPP01, but for some arguments back to ELP + different selection of perturbations + lower truncation.  Good fit with DE 405 in [1950,2060]
-##    - ELP/MPP02*: improved secular arguments, better long-term comparison to DE 405/406 [-3000,2500]
-##    - ELP/MPP02(LLR): ELP/MPP02(*?), optimised for lunar ranging since 1970
-##    - ELPa: ELP + few Poisson terms (tested in the current study only?)
-##    - ELPa*: ELPa + better secular arguments (as in ELP/MPP02*)
-##  - It is not entirely clear which version is given below, but we can hope it is ELP/MPP02*.  However, the subroutine
-##      elp82b_lbr() above is known to underperform (by a factor of 10) in accuracy.
   
 def elp_mpp02_xyz(jd, mode):
     print("Compute xyz:")
