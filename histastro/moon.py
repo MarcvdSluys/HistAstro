@@ -16,10 +16,10 @@ jd2000 = 2451545
 # Global variables:
 modeInit = 999  # := uninitialised
 
-nmpb = np.zeros((4,4))      # nmpb(3,3)
+nmpb = np.zeros((3,3))      # nmpb(3,3)
 cmpb = np.zeros(2646)       # cmpb(max1), max1 = 2645
 fmpb = np.zeros((5,2646))   # fmpb(0:4,max1)
-nper = np.zeros((4,4,4))    # nper(3,0:3,3)
+nper = np.zeros((3,4,3))    # nper(3,0:3,3)
 cper = np.zeros(33257)      # cper(max2), max2=33256
 fper = np.zeros((5,33257))  # fper(0:4,max2)
 
@@ -312,15 +312,15 @@ def elp_mpp02_read_files():
     formatMainBody   = ff.FortranRecordReader('(4I3,2x,F13.5,5F12.2)')  # Block body format
     
     
-    for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
+    for iFile in range(3):  # do iFile=1,3  # These used to be three files
         line = inFile.readline()
-        nmpb[iFile,1] = formatMainHeader.read(line)[0]
+        nmpb[iFile,0] = formatMainHeader.read(line)[0]
         #if(nerr!=0): return 3
         
-        nmpb[iFile,2] = ir+1
-        nmpb[iFile,3] = nmpb[iFile,1] + nmpb[iFile,2] - 1
+        nmpb[iFile,1] = ir+1
+        nmpb[iFile,2] = nmpb[iFile,0] + nmpb[iFile,1] - 1
 
-        nLines = int(round(nmpb[iFile,1]))
+        nLines = int(round(nmpb[iFile,0]))
         for iLine in range(1, nLines+1):  # do iLine=1,nmpb(iFile,1)
             line = inFile.readline()
             ilu[1],ilu[2],ilu[3],ilu[4], a, b[1],b[2],b[3],b[4],b[5] = formatMainBody.read(line)
@@ -328,7 +328,7 @@ def elp_mpp02_read_files():
             
             ir += 1
             tgv = b[1] + dtasm*b[5]
-            if(iFile==3):  a -= 2*a*delnu/3
+            if(iFile==2):  a -= 2*a*delnu/3
             cmpb[ir] = a + tgv*(delnp-am*delnu) + b[2]*delg + b[3]*dele + b[4]*delep
             
             for k in range(5):  # do k=0,4
@@ -336,7 +336,7 @@ def elp_mpp02_read_files():
                 for i in range(1,5):  # do i=1,4
                     fmpb[k,ir] += ilu[i] * dela[i,k]
                     
-            if(iFile==3): fmpb[0,ir] += pio2
+            if(iFile==2): fmpb[0,ir] += pio2
         
     
     # Read the Perturbations series:
@@ -350,17 +350,17 @@ def elp_mpp02_read_files():
     formatPertHeader = ff.FortranRecordReader('(25x,2I10)')         # Perturbation header format
     formatPertBody   = ff.FortranRecordReader('(I5,2D20.13,16I3)')  # Perturbation body format
     
-    for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
+    for iFile in range(3):  # do iFile=1,3  # These used to be three files
         for it in range(4):   # do it=0,3
             #if(nerr!=0): return 6
             line = inFile.readline()
-            nper[iFile,it,1],ipt = formatPertHeader.read(line)
+            nper[iFile,it,0],ipt = formatPertHeader.read(line)
             
-            nper[iFile,it,2] = ir+1
-            nper[iFile,it,3] = nper[iFile,it,1] + nper[iFile,it,2] - 1
-            if(nper[iFile,it,1]==0): continue  # cycle
+            nper[iFile,it,1] = ir+1
+            nper[iFile,it,2] = nper[iFile,it,0] + nper[iFile,it,1] - 1
+            if(nper[iFile,it,0]==0): continue  # cycle
             
-            nLines = int(round(nper[iFile,it,1]))
+            nLines = int(round(nper[iFile,it,0]))
             for iLine in range(1, nLines+1):  # do iLine=1,nper(iFile,it,1)
                 line = inFile.readline()
                 icount,s,c,ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10],ifi[11],ifi[12],ifi[13],ifi[14],ifi[15],ifi[16] = formatPertBody.read(line)
@@ -477,12 +477,12 @@ def elp_mpp02_xyz(jd, mode):
     t[4] = t[2]**2      # t^4
     
     # Evaluation of the series: substitution of time in the series
-    v = np.zeros(7)  # v(6)
-    for iVar in range(1,4):  # do iVar=1,3  # iVar=1,2,3: Longitude, Latitude, Distance
+    v = np.zeros(6)  # v(6)
+    for iVar in range(3):  # do iVar=1,3  # iVar=0,1,2: Longitude, Latitude, Distance
         
         # Main Problem series:
-        nLineStart = int(round(nmpb[iVar,2]))
-        nLineEnd   = int(round(nmpb[iVar,3]))
+        nLineStart = int(round(nmpb[iVar,1]))
+        nLineEnd   = int(round(nmpb[iVar,2]))
         for iLine in range(nLineStart, nLineEnd+1):  # do iLine=nmpb(iVar,2),nmpb(iVar,3)
             x = cmpb[iLine]
             y = fmpb[0,iLine]
@@ -498,8 +498,8 @@ def elp_mpp02_xyz(jd, mode):
         
         # Perturbations series:
         for it in range(4):  # do it=0,3
-            nLineStart = int(round(nper[iVar,it,2]))
-            nLineEnd   = int(round(nper[iVar,it,3]))
+            nLineStart = int(round(nper[iVar,it,1]))
+            nLineEnd   = int(round(nper[iVar,it,2]))
             for iLine in range(nLineStart, nLineEnd+1):  # do iLine=nper(iVar,it,2),nper(iVar,it,3)
                 x = cper[iLine]
                 y = fper[0,iLine]
@@ -516,29 +516,29 @@ def elp_mpp02_xyz(jd, mode):
             
         
     # Compute the spherical coordinates for the mean inertial ecliptic and equinox of date:
-    v[1]   = v[1]/r2as + w[1,0] + w[1,1]*t[1] + w[1,2]*t[2] + w[1,3]*t[3] + w[1,4]*t[4]  # Longitude + mean longitude (rad)
-    v[2]   = v[2]/r2as                                                                   # Latitude (rad)
-    v[3]   = v[3] * a405 / aelp                                                          # Distance (km)
+    v[0]   = v[0]/r2as + w[1,0] + w[1,1]*t[1] + w[1,2]*t[2] + w[1,3]*t[3] + w[1,4]*t[4]  # Longitude + mean longitude (rad)
+    v[1]   = v[1]/r2as                                                                   # Latitude (rad)
+    v[2]   = v[2] * a405 / aelp                                                          # Distance (km)
     
-    v[1] = v[1] % pi2
+    v[0] = v[0] % pi2
     
     print('t: ', t[0],t[1],t[2],t[3],t[4])
-    print('v:       ', v[1]*r2d,v[2]*r2d,v[3], v[4],v[5],v[6])
+    print('v:       ', v[0]*r2d,v[1]*r2d,v[2], v[3],v[4],v[5])
     
-    #lambda = v[1]
-    #beta = v[2]
-    #rad = v[3]
+    #lambda = v[0]
+    #beta = v[1]
+    #rad = v[2]
     #lambda = lambda + [5029.0966*t[1] + 1.1120*t[2] + 0.000077*t[3] - 0.00002353*t[4]  -  0.29965*t(1]) * as2r  # Precession from J2000 to EoD(?), but only in longitude#
     #print((lambda%pi2)*r2d, beta*r2d, rad
     
     
     # compute the rectangular coordinates (for the EoD?):
-    clamb  = m.cos(v[1])
-    slamb  = m.sin(v[1])
-    cbeta  = m.cos(v[2])
-    sbeta  = m.sin(v[2])
-    cw     = v[3]*cbeta
-    sw     = v[3]*sbeta
+    clamb  = m.cos(v[0])
+    slamb  = m.sin(v[0])
+    cbeta  = m.cos(v[1])
+    sbeta  = m.sin(v[1])
+    cw     = v[2]*cbeta
+    sw     = v[2]*sbeta
     print("c/s l/b: ", clamb,slamb, cbeta,sbeta)
     
     x1     = cw*clamb
@@ -569,12 +569,12 @@ def elp_mpp02_xyz(jd, mode):
     
     
     # Compute the rectangular velocities for the equinox J2000:
-    v[4]   = v[4]/r2as + w[1,1] + 2*w[1,2]*t[1] + 3*w[1,3]*t[2] + 4*w[1,4]*t[3]
-    v[5]   = v[5]/r2as
+    v[3]   = v[3]/r2as + w[1,1] + 2*w[1,2]*t[1] + 3*w[1,3]*t[2] + 4*w[1,4]*t[3]
+    v[4]   = v[4]/r2as
     
-    xp1    = (v[6]*cbeta - v[5]*sw)*clamb - v[4]*x2
-    xp2    = (v[6]*cbeta - v[5]*sw)*slamb + v[4]*x1
-    xp3    = v[6]*sbeta  + v[5]*cw
+    xp1    = (v[5]*cbeta - v[4]*sw)*clamb - v[3]*x2
+    xp2    = (v[5]*cbeta - v[4]*sw)*slamb + v[3]*x1
+    xp3    = v[5]*sbeta  + v[4]*cw
     
     ppw    = p1 + (2*p2 + 3*p3*t[1] + 4*p4*t[2] + 5*p5*t[3]) * t[1]
     qpw    = q1 + (2*q2 + 3*q3*t[1] + 4*q4*t[2] + 5*q5*t[3]) * t[1]
