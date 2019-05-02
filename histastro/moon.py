@@ -28,10 +28,9 @@ p1=0.;p2=0.;p3=0.;p4=0.;p5=0.;  q1=0.;q2=0.;q3=0.;q4=0.;q5=0.
 
 eart = np.zeros(5)
 peri = np.zeros(5)
-dela = np.zeros((5,5))      # del(1:4,0:4) - del is a keyword in Python
+dela = np.zeros((4,5))      # del(1:4,0:4) - del is a keyword in Python
 zeta = np.zeros(5)
-
-p = np.zeros((9,5))         # p(8,0:4)
+p = np.zeros((8,5))         # p(8,0:4)
 delnu=0.; dele=0.; delg=0.; delnp=0.; delep=0.; dtasm=0.; am=0.
 
 
@@ -215,34 +214,34 @@ def elp_mpp02_initialise(mode):
     
     # Arguments of Delaunay:
     for iD in range(5):     # do iD=0,4
-       dela[1,iD] = w[0,iD]  - eart[iD]                 # D   =  W1 - Te + 180 degrees
-       dela[2,iD] = w[0,iD]  - w[2,iD]                  # F   =  W1 - W3
-       dela[3,iD] = w[0,iD]  - w[1,iD]                  # l   =  W1 - W2   mean anomaly of the Moon
-       dela[4,iD] = eart[iD] - peri[iD]                 # l'  =  Te - Pip  mean anomaly of EMB
+       dela[0,iD] = w[0,iD]  - eart[iD]                 # D   =  W1 - Te + 180 degrees
+       dela[1,iD] = w[0,iD]  - w[2,iD]                  # F   =  W1 - W3
+       dela[2,iD] = w[0,iD]  - w[1,iD]                  # l   =  W1 - W2   mean anomaly of the Moon
+       dela[3,iD] = eart[iD] - peri[iD]                 # l'  =  Te - Pip  mean anomaly of EMB
     
-    dela[1,0] = dela[1,0] + pi
+    dela[0,0] += pi
     
     # Planetary arguments: mean longitudes for J2000 (from VSOP2000):
-    p[1,0] = elp_dms2rad(252, 15,  3.216919)         # Mercury
-    p[2,0] = elp_dms2rad(181, 58, 44.758419)         # Venus
-    p[3,0] = elp_dms2rad(100, 27, 59.138850)         # EMB (eart(0))
-    p[4,0] = elp_dms2rad(355, 26,  3.642778)         # Mars
-    p[5,0] = elp_dms2rad( 34, 21,  5.379392)         # Jupiter
-    p[6,0] = elp_dms2rad( 50,  4, 38.902495)         # Saturn
-    p[7,0] = elp_dms2rad(314,  3,  4.354234)         # Uranus
-    p[8,0] = elp_dms2rad(304, 20, 56.808371)         # Neptune
+    p[0,0] = elp_dms2rad(252, 15,  3.216919)         # Mercury
+    p[1,0] = elp_dms2rad(181, 58, 44.758419)         # Venus
+    p[2,0] = elp_dms2rad(100, 27, 59.138850)         # EMB (eart(0))
+    p[3,0] = elp_dms2rad(355, 26,  3.642778)         # Mars
+    p[4,0] = elp_dms2rad( 34, 21,  5.379392)         # Jupiter
+    p[5,0] = elp_dms2rad( 50,  4, 38.902495)         # Saturn
+    p[6,0] = elp_dms2rad(314,  3,  4.354234)         # Uranus
+    p[7,0] = elp_dms2rad(304, 20, 56.808371)         # Neptune
     
     # Planetary arguments: mean motions (from VSOP2000):
-    p[1,1] = 538101628.66888/r2as                    # Mercury
-    p[2,1] = 210664136.45777/r2as                    # Venus
-    p[3,1] = 129597742.29300/r2as                    # EMB (eart(1))
-    p[4,1] =  68905077.65936/r2as                    # Mars
-    p[5,1] =  10925660.57335/r2as                    # Jupiter
-    p[6,1] =   4399609.33632/r2as                    # Saturn
-    p[7,1] =   1542482.57845/r2as                    # Uranus
-    p[8,1] =    786547.89700/r2as                    # Neptune
+    p[0,1] = 538101628.66888/r2as                    # Mercury
+    p[1,1] = 210664136.45777/r2as                    # Venus
+    p[2,1] = 129597742.29300/r2as                    # EMB (eart(1))
+    p[3,1] =  68905077.65936/r2as                    # Mars
+    p[4,1] =  10925660.57335/r2as                    # Jupiter
+    p[5,1] =   4399609.33632/r2as                    # Saturn
+    p[6,1] =   1542482.57845/r2as                    # Uranus
+    p[7,1] =    786547.89700/r2as                    # Neptune
     
-    p[1:9,2:5] = 0  # p(1:8,2:4) = 0
+    p[0:8,2:5] = 0  # p(1:8,2:4) = 0
     
     
     # Zeta: Mean longitude of the Moon W1 + Rate of precession (pt):
@@ -295,7 +294,7 @@ def elp_mpp02_read_files():
     
     # Read the Main Problem series:
     ir=0
-    ilu = np.zeros(5)  # int(!) ilu(4)
+    ilu = np.zeros(4)  # int(!) ilu(4)
     a = 0.
     b = np.zeros(6)  # double b(5)
     #ierr=1
@@ -322,7 +321,7 @@ def elp_mpp02_read_files():
         nLines = int(round(nmpb[iFile,0]))
         for iLine in range(1, nLines+1):  # do iLine=1,nmpb(iFile,1)
             line = inFile.readline()
-            ilu[1],ilu[2],ilu[3],ilu[4], a, b[1],b[2],b[3],b[4],b[5] = formatMainBody.read(line)
+            ilu[0],ilu[1],ilu[2],ilu[3], a, b[1],b[2],b[3],b[4],b[5] = formatMainBody.read(line)
             #if(nerr!=0): return 4
             
             tgv = b[1] + dtasm*b[5]
@@ -331,7 +330,7 @@ def elp_mpp02_read_files():
             
             for k in range(5):  # do k=0,4
                 fmpb[k,ir] = 0
-                for i in range(1,5):  # do i=1,4
+                for i in range(4):  # do i=1,4
                     fmpb[k,ir] += ilu[i] * dela[i,k]
                     
             if(iFile==2): fmpb[0,ir] += pio2
@@ -344,7 +343,7 @@ def elp_mpp02_read_files():
     icount = 0
     s = 0.0
     c = 0.0
-    ifi = np.zeros(17)  # int ifi(16)
+    ifi = np.zeros(16)  # int ifi(16)
     
     formatPertHeader = ff.FortranRecordReader('(25x,2I10)')         # Perturbation header format
     formatPertBody   = ff.FortranRecordReader('(I5,2D20.13,16I3)')  # Perturbation body format
@@ -362,7 +361,7 @@ def elp_mpp02_read_files():
             nLines = int(round(nper[iFile,it,0]))
             for iLine in range(1, nLines+1):  # do iLine=1,nper(iFile,it,1)
                 line = inFile.readline()
-                icount,s,c,ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10],ifi[11],ifi[12],ifi[13],ifi[14],ifi[15],ifi[16] = formatPertBody.read(line)
+                icount,s,c,ifi[0],ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10],ifi[11],ifi[12],ifi[13],ifi[14],ifi[15] = formatPertBody.read(line)
                 #if(nerr!=0): return 7
                 
                 cper[ir] = m.sqrt(c**2+s**2)
@@ -372,13 +371,13 @@ def elp_mpp02_read_files():
                 for k in range(5):  # do k=0,4
                     fper[k,ir] = 0
                     if(k==0): fper[k,ir] = pha
-                    for i in range(1,5):  # do i=1,4
+                    for i in range(4):  # do i=1,4
                         fper[k,ir] += ifi[i] * dela[i,k]
                         
-                    for i in range(5,13):  # do i=5,12
+                    for i in range(4,12):  # do i=5,12
                         fper[k,ir] += ifi[i] * p[i-4,k]
                     
-                    fper[k,ir] += ifi[13] * zeta[k]
+                    fper[k,ir] += ifi[12] * zeta[k]
                 ir = ir+1
                 
     inFile.close()
