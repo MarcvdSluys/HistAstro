@@ -13,10 +13,9 @@ pi2 = pi*2
 pio2 = pi/2
 jd2000 = 2451545
 
-# Global variables
+# Global variables:
 modeInit = 999  # := uninitialised
 
-# Global variables?:
 nmpb = np.zeros((4,4))      # nmpb(3,3)
 cmpb = np.zeros(2646)       # cmpb(max1), max1 = 2645
 fmpb = np.zeros((5,2646))   # fmpb(0:4,max1)
@@ -26,7 +25,15 @@ cper = np.zeros(33257)      # cper(max2), max2=33256
 fper = np.zeros((5,33257))  # fper(0:4,max2)
 
 w = np.zeros((4,5))         # w(1:3,0:4)
-p1=0.; p2=0.; p3=0.; p4=0.; p5=0.;  q1=0.; q2=0.; q3=0.; q4=0.; q5=0.
+p1=0.;p2=0.;p3=0.;p4=0.;p5=0.;  q1=0.;q2=0.;q3=0.;q4=0.;q5=0.
+
+eart = np.zeros(5)
+peri = np.zeros(5)
+zeta = np.zeros(5)
+dela = np.zeros((5,5))  # del(1:4,0:4) - del is a keyword in Python
+
+p = np.zeros((9,5))  # p(8,0:4)
+delnu=0.; dele=0.; delg=0.; delnp=0.; delep=0.; dtasm=0.; am=0.
 
 
 
@@ -38,14 +45,14 @@ def elp_mpp02_initialise_and_read_files(mode):
     # Initializing of constants and reading the files:
     ierr = 0
     if(mode!=modeInit):
-        w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5 = elp_mpp02_initialise(mode)
-        ierr = elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
+        elp_mpp02_initialise(mode)
+        ierr = elp_mpp02_read_files()
         print("init_and_read ierr:", ierr)
         if(ierr!=0): return ierr
         
         modeInit = mode  # Indicate that the data have been initialised
         print("modeInit:", modeInit)
-        return ierr,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+        return ierr
         
     return ierr
 #***************************************************************************************************
@@ -80,7 +87,7 @@ def elp_mpp02_initialise_and_read_files(mode):
 ##   - ELPdoc: Lunar solution ELP, version ELP/MPP02,  Jean Chapront and Gerard Francou, October 2002
 
 def elp_mpp02_initialise(mode):
-    global modeInit,  w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    global modeInit,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
     print("Initialise:", modeInit)
     
     Dprec = -0.29965  # Constant for the correction to the constant of precession - source: IAU 2000A
@@ -273,7 +280,7 @@ def elp_mpp02_initialise(mode):
     q4 = -0.1371808e-11
     q5 = -0.320334e-14
     
-    return w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    return
 #***************************************************************************************************
   
   
@@ -287,10 +294,10 @@ def elp_mpp02_initialise(mode):
 ## - module elp_mpp02_constants:  Set of the constants of ELP/MPP02 solution (input)
 ## - module elp_mpp02_series:  Series of the ELP/MPP02 solution (output)
   
-def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5):
+def elp_mpp02_read_files():
     print("Read files:")
-    
     global nmpb,cmpb,fmpb, nper,cper,fper
+    global w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
     
     # Read the Main Problem series:
     ir=0
@@ -471,14 +478,13 @@ def elp_mpp02_lbr(jd, mode):
   
 def elp_mpp02_xyz(jd, mode):
     print("Compute xyz:")
-    
-    # Constants:
-    a405=384747.9613701725
-    aelp=384747.980674318
-    sc=36525  # Moon mean distance for DE405 und ELP; Julian century in days
-    
     global nmpb,cmpb,fmpb, nper,cper,fper
     global w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    
+    # Constants:
+    a405 = 384747.9613701725  # Moon mean distance for DE405
+    aelp = 384747.980674318   # Moon mean distance for ELP
+    sc   = 36525              # Julian century in days
     
     # Initialise data and read files if needed:
     ierr = elp_mpp02_initialise_and_read_files(mode)
