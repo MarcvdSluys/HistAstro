@@ -16,21 +16,21 @@ jd2000 = 2451545
 # Global variables:
 modeInit = 999  # := uninitialised
 
-nmpb = np.zeros((3,3))      # nmpb(3,3)
-cmpb = np.zeros(2645)       # cmpb(max1), max1 = 2645
-fmpb = np.zeros((5,2645))   # fmpb(0:4,max1)
-nper = np.zeros((3,4,3))    # nper(3,0:3,3)
-cper = np.zeros(33256)      # cper(max2), max2=33256
-fper = np.zeros((5,33256))  # fper(0:4,max2)
+nmpb = np.zeros((3,3))
+cmpb = np.zeros(2645)
+fmpb = np.zeros((5,2645))
+nper = np.zeros((3,4,3))
+cper = np.zeros(33256)
+fper = np.zeros((5,33256))
 
-w    = np.zeros((3,5))      # w(1:3,0:4)
+w    = np.zeros((3,5))
 p1=0.;p2=0.;p3=0.;p4=0.;p5=0.;  q1=0.;q2=0.;q3=0.;q4=0.;q5=0.
 
 eart = np.zeros(5)
 peri = np.zeros(5)
-dela = np.zeros((4,5))      # del(1:4,0:4) - del is a keyword in Python
+dela = np.zeros((4,5))
 zeta = np.zeros(5)
-p = np.zeros((8,5))         # p(8,0:4)
+p    = np.zeros((8,5))
 delnu=0.; dele=0.; delg=0.; delnp=0.; delep=0.; dtasm=0.; am=0.
 
 
@@ -213,7 +213,7 @@ def elp_mpp02_initialise(mode):
     w[2,1] +=  Cw3_1/r2as
     
     # Arguments of Delaunay:
-    for iD in range(5):     # do iD=0,4
+    for iD in range(5):
        dela[0,iD] = w[0,iD]  - eart[iD]                 # D   =  W1 - Te + 180 degrees
        dela[1,iD] = w[0,iD]  - w[2,iD]                  # F   =  W1 - W3
        dela[2,iD] = w[0,iD]  - w[1,iD]                  # l   =  W1 - W2   mean anomaly of the Moon
@@ -241,7 +241,7 @@ def elp_mpp02_initialise(mode):
     p[6,1] =   1542482.57845/r2as                    # Uranus
     p[7,1] =    786547.89700/r2as                    # Neptune
     
-    p[0:8,2:5] = 0  # p(1:8,2:4) = 0
+    p[0:8,2:5] = 0
     
     
     # Zeta: Mean longitude of the Moon W1 + Rate of precession (pt):
@@ -294,7 +294,7 @@ def elp_mpp02_read_files():
     
     # Read the Main Problem series:
     ir=0
-    ilu = np.zeros(4)  # int(!) ilu(4)
+    ilu = np.zeros(4)  # will contain ints
     a = 0.
     b = np.zeros(6)  # double b(5)
     #ierr=1
@@ -368,13 +368,13 @@ def elp_mpp02_read_files():
                 pha = m.atan2(c,s)
                 if(pha<0): pha = pha+pi2
                 
-                for k in range(5):  # do k=0,4
+                for k in range(5):
                     fper[k,ir] = 0
                     if(k==0): fper[k,ir] = pha
-                    for i in range(4):  # do i=1,4
+                    for i in range(4):
                         fper[k,ir] += ifi[i] * dela[i,k]
                         
-                    for i in range(4,12):  # do i=5,12
+                    for i in range(4,12):
                         fper[k,ir] += ifi[i] * p[i-4,k]
                     
                     fper[k,ir] += ifi[12] * zeta[k]
