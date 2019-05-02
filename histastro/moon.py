@@ -23,7 +23,7 @@ nper = np.zeros((3,4,3))    # nper(3,0:3,3)
 cper = np.zeros(33256)      # cper(max2), max2=33256
 fper = np.zeros((5,33256))  # fper(0:4,max2)
 
-w    = np.zeros((4,5))      # w(1:3,0:4)
+w    = np.zeros((3,5))      # w(1:3,0:4)
 p1=0.;p2=0.;p3=0.;p4=0.;p5=0.;  q1=0.;q2=0.;q3=0.;q4=0.;q5=0.
 
 eart = np.zeros(5)
@@ -141,25 +141,25 @@ def elp_mpp02_initialise(mode):
 
     # Fundamental arguments (Moon and EMB - ELPdoc, Table 1):
     # W1: mean longitude of the Moon:
-    w[1,0]  = elp_dms2rad(218,18,59.95571+Dw1_0)      # Source: ELP
-    w[1,1]  = (1732559343.73604+Dw1_1)/r2as           # Source: ELP
-    w[1,2]  = (        -6.8084 +Dw1_2)/r2as           # Source: DE405
-    w[1,3]  =          0.66040e-2/r2as                  # Source: ELP
-    w[1,4]  =         -0.31690e-4/r2as                  # Source: ELP
+    w[0,0]  = elp_dms2rad(218,18,59.95571+Dw1_0)      # Source: ELP
+    w[0,1]  = (1732559343.73604+Dw1_1)/r2as           # Source: ELP
+    w[0,2]  = (        -6.8084 +Dw1_2)/r2as           # Source: DE405
+    w[0,3]  =          0.66040e-2/r2as                  # Source: ELP
+    w[0,4]  =         -0.31690e-4/r2as                  # Source: ELP
     
     # W2: mean longitude of the lunar perigee:
-    w[2,0]  = elp_dms2rad( 83,21,11.67475+Dw2_0)      # Source: ELP
-    w[2,1]  = (  14643420.3171 +Dw2_1)/r2as           # Source: DE405
-    w[2,2]  = (       -38.2631)/r2as                  # Source: DE405
-    w[2,3]  =         -0.45047e-1/r2as                  # Source: ELP
-    w[2,4]  =          0.21301e-3/r2as                  # Source: ELP
+    w[1,0]  = elp_dms2rad( 83,21,11.67475+Dw2_0)      # Source: ELP
+    w[1,1]  = (  14643420.3171 +Dw2_1)/r2as           # Source: DE405
+    w[1,2]  = (       -38.2631)/r2as                  # Source: DE405
+    w[1,3]  =         -0.45047e-1/r2as                  # Source: ELP
+    w[1,4]  =          0.21301e-3/r2as                  # Source: ELP
     
     # W3: mean longitude of the lunar ascending node:
-    w[3,0]  = elp_dms2rad(125, 2,40.39816+Dw3_0)      # Source: ELP
-    w[3,1]  = (  -6967919.5383 +Dw3_1)/r2as           # Source: DE405
-    w[3,2]  =          6.3590/r2as                    # Source: DE405
-    w[3,3]  =          0.76250e-2/r2as                  # Source: ELP
-    w[3,4]  =         -0.35860e-4/r2as                  # Source: ELP
+    w[2,0]  = elp_dms2rad(125, 2,40.39816+Dw3_0)      # Source: ELP
+    w[2,1]  = (  -6967919.5383 +Dw3_1)/r2as           # Source: DE405
+    w[2,2]  =          6.3590/r2as                    # Source: DE405
+    w[2,3]  =          0.76250e-2/r2as                  # Source: ELP
+    w[2,4]  =         -0.35860e-4/r2as                  # Source: ELP
     
     # Earth-Moon (EMB) elements:
     # Te: mean longitude of EMB:
@@ -179,45 +179,45 @@ def elp_mpp02_initialise(mode):
     # Corrections to the secular terms of Moon angles.  This gives a better (long-term?) fit
     #   to DE 406.  See ELPdoc, Table 6/paper, Table 4, line 2:
     if(mode==1):  # DE 405 / DE 406
-       w[1,3] -= 0.00018865/r2as
-       w[1,4] -= 0.00001024/r2as
+       w[0,3] -= 0.00018865/r2as
+       w[0,4] -= 0.00001024/r2as
        
-       w[2,2] += 0.00470602/r2as
-       w[2,3] -= 0.00025213/r2as
+       w[1,2] += 0.00470602/r2as
+       w[1,3] -= 0.00025213/r2as
        
-       w[3,2] -= 0.00261070/r2as
-       w[3,3] -= 0.00010712/r2as
+       w[2,2] -= 0.00261070/r2as
+       w[2,3] -= 0.00010712/r2as
 
     
     # Corrections to the mean motions of the Moon angles W2 and W3, infered from the modifications of the constants:
-    x2     =   w[2,1] / w[1,1]
-    x3     =   w[3,1] / w[1,1]
+    x2     =   w[1,1] / w[0,1]
+    x3     =   w[2,1] / w[0,1]
     y2     =   am*bp[1,1] + xa*bp[5,1]
     y3     =   am*bp[1,2] + xa*bp[5,2]
     
     d21    =   x2 - y2
-    d22    =   w[1,1] * bp[2,1]
-    d23    =   w[1,1] * bp[3,1]
-    d24    =   w[1,1] * bp[4,1]
+    d22    =   w[0,1] * bp[2,1]
+    d23    =   w[0,1] * bp[3,1]
+    d24    =   w[0,1] * bp[4,1]
     d25    =   y2/am
     
     d31    =   x3 - y3
-    d32    =   w[1,1] * bp[2,2]
-    d33    =   w[1,1] * bp[3,2]
-    d34    =   w[1,1] * bp[4,2]
+    d32    =   w[0,1] * bp[2,2]
+    d33    =   w[0,1] * bp[3,2]
+    d34    =   w[0,1] * bp[4,2]
     d35    =   y3/am
     
     Cw2_1  =  d21*Dw1_1+d25*Deart_1+d22*Dgam+d23*De+d24*Dep
     Cw3_1  =  d31*Dw1_1+d35*Deart_1+d32*Dgam+d33*De+d34*Dep
     
-    w[2,1] +=  Cw2_1/r2as
-    w[3,1] +=  Cw3_1/r2as
+    w[1,1] +=  Cw2_1/r2as
+    w[2,1] +=  Cw3_1/r2as
     
     # Arguments of Delaunay:
     for iD in range(5):     # do iD=0,4
-       dela[1,iD] = w[1,iD]  - eart[iD]                 # D   =  W1 - Te + 180 degrees
-       dela[2,iD] = w[1,iD]  - w[3,iD]                  # F   =  W1 - W3
-       dela[3,iD] = w[1,iD]  - w[2,iD]                  # l   =  W1 - W2   mean anomaly of the Moon
+       dela[1,iD] = w[0,iD]  - eart[iD]                 # D   =  W1 - Te + 180 degrees
+       dela[2,iD] = w[0,iD]  - w[2,iD]                  # F   =  W1 - W3
+       dela[3,iD] = w[0,iD]  - w[1,iD]                  # l   =  W1 - W2   mean anomaly of the Moon
        dela[4,iD] = eart[iD] - peri[iD]                 # l'  =  Te - Pip  mean anomaly of EMB
     
     dela[1,0] = dela[1,0] + pi
@@ -246,17 +246,17 @@ def elp_mpp02_initialise(mode):
     
     
     # Zeta: Mean longitude of the Moon W1 + Rate of precession (pt):
-    zeta[0] = w[1,0]
-    zeta[1] = w[1,1] + (5029.0966+Dprec)/r2as
-    zeta[2] = w[1,2]
-    zeta[3] = w[1,3]
-    zeta[4] = w[1,4]
+    zeta[0] = w[0,0]
+    zeta[1] = w[0,1] + (5029.0966+Dprec)/r2as
+    zeta[2] = w[0,2]
+    zeta[3] = w[0,3]
+    zeta[4] = w[0,4]
     
     # Corrections to the parameters: Nu, E, Gamma, n' et e' (Source: ELP):
-    delnu  = (+0.55604+Dw1_1)/r2as/w[1,1]                 # Correction to the mean motion of the Moon
+    delnu  = (+0.55604+Dw1_1)/r2as/w[0,1]                 # Correction to the mean motion of the Moon
     dele   = (+0.01789+De)/r2as                           # Correction to the half coefficient of sin(l) in longitude
     delg   = (-0.08066+Dgam)/r2as                         # Correction to the half coefficient of sin(F) in latitude
-    delnp  = (-0.06424+Deart_1)/r2as/w[1,1]               # Correction to the mean motion of EMB
+    delnp  = (-0.06424+Deart_1)/r2as/w[0,1]               # Correction to the mean motion of EMB
     delep  = (-0.12879+Dep)/r2as                          # Correction to the eccentricity of EMB
     
     # Precession of the longitude of the ascending node of the mean ecliptic of date on fixed ecliptic J2000 (Laskar, 1986):
@@ -515,7 +515,7 @@ def elp_mpp02_xyz(jd, mode):
             
         
     # Compute the spherical coordinates for the mean inertial ecliptic and equinox of date:
-    v[0]   = v[0]/r2as + w[1,0] + w[1,1]*t[1] + w[1,2]*t[2] + w[1,3]*t[3] + w[1,4]*t[4]  # Longitude + mean longitude (rad)
+    v[0]   = v[0]/r2as + w[0,0] + w[0,1]*t[1] + w[0,2]*t[2] + w[0,3]*t[3] + w[0,4]*t[4]  # Longitude + mean longitude (rad)
     v[1]   = v[1]/r2as                                                                   # Latitude (rad)
     v[2]   = v[2] * a405 / aelp                                                          # Distance (km)
     
@@ -568,7 +568,7 @@ def elp_mpp02_xyz(jd, mode):
     
     
     # Compute the rectangular velocities for the equinox J2000:
-    v[3]   = v[3]/r2as + w[1,1] + 2*w[1,2]*t[1] + 3*w[1,3]*t[2] + 4*w[1,4]*t[3]
+    v[3]   = v[3]/r2as + w[0,1] + 2*w[0,2]*t[1] + 3*w[0,3]*t[2] + 4*w[0,4]*t[3]
     v[4]   = v[4]/r2as
     
     xp1    = (v[5]*cbeta - v[4]*sw)*clamb - v[3]*x2
