@@ -33,15 +33,18 @@ p1=0.; p2=0.; p3=0.; p4=0.; p5=0.;  q1=0.; q2=0.; q3=0.; q4=0.; q5=0.
 #***************************************************************************************************
 def elp_mpp02_initialise_and_read_files(mode):
     global modeInit
+    print("Initialise and read files:", modeInit)
+    
     # Initializing of constants and reading the files:
     ierr = 0
     if(mode!=modeInit):
         w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5 = elp_mpp02_initialise(mode)
         ierr = elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
+        print("init_and_read ierr:", ierr)
         if(ierr!=0): return ierr
         
         modeInit = mode  # Indicate that the data have been initialised
-        
+        print("modeInit:", modeInit)
         return ierr,  w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
         
     return ierr
@@ -78,16 +81,17 @@ def elp_mpp02_initialise_and_read_files(mode):
 
 def elp_mpp02_initialise(mode):
     global modeInit,  w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
-   
+    print("Initialise:", modeInit)
     
     Dprec = -0.29965  # Constant for the correction to the constant of precession - source: IAU 2000A
+    
     
     #bp = np.array([[0.311079095,-0.4482398e-2], [-0.110248500e-2,0.1056062e-2], [0.50928e-4,-0.103837907],
     #               [0.6682870e-3,-0.129807200e-2], [-0.1780280e-3,-0.37342e-4]]) # (5,2)
     bp = np.array([[0,0,0], [0,0.311079095,-0.4482398e-2], [0,-0.110248500e-2,0.1056062e-2], [0,0.50928e-4,-0.103837907],
                    [0,0.6682870e-3,-0.129807200e-2], [0,-0.1780280e-3,-0.37342e-4]])  # (5,2) -> (6,3) with first row/column 0
     
-    if(mode<0 or mode>1):  sys.exit('elp_mpp02_initialise(): mode must have value 0 or 1, not %i' % mode)
+    if(mode<0 or mode>1): sys.exit('elp_mpp02_initialise(): mode must have value 0 or 1, not %i' % mode)
     
     # Constants for the evaluation of the partial derivatives:
     am     =  0.074801329           # Ratio of the mean motions (EMB / Moon)
@@ -277,17 +281,20 @@ def elp_mpp02_initialise(mode):
 #***************************************************************************************************
 #> \brief  Read the six data files containing the ELP/MPP02 series
 ##
-## \retval ierr      File rrror index: ierr=0: no error, ierr=1: file error
+## \retval ierr      File error index: ierr=0: no error, ierr=1: file error
 ##
 ## \note
 ## - module elp_mpp02_constants:  Set of the constants of ELP/MPP02 solution (input)
 ## - module elp_mpp02_series:  Series of the ELP/MPP02 solution (output)
   
 def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5):
+    print("Read files:")
+    
     global nmpb,cmpb,fmpb, nper,cper,fper
     
     # Read the Main Problem series:
-    ir = 0
+    ir=0
+    
     ilu = np.zeros(5)  # int(!) ilu(4)
     a = 0.
     b = np.zeros(6)  # double b(5)
@@ -297,12 +304,12 @@ def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,
     # Name of the (here single) ELPMPP02 file:
     fileName = 'data/elp_mpp02.dat'
     inFile = open(fileName,'r')
-    #inquire(file=trim(fileName), exist=fexist)
     #if(not fexist) file_open_error_quit(trim(fileName), 1, 1)  # 1: input file
     
     import fortranformat as ff
     formatMainHeader = ff.FortranRecordReader('(25x,I10)')              # Block header format
     formatMainBody   = ff.FortranRecordReader('(4I3,2x,F13.5,5F12.2)')  # Block body format
+    
     
     for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
         line = inFile.readline()
@@ -311,7 +318,7 @@ def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,
         
         nmpb[iFile,2] = ir+1
         nmpb[iFile,3] = nmpb[iFile,1] + nmpb[iFile,2] - 1
-        
+
         nLines = int(round(nmpb[iFile,1]))
         for iLine in range(1, nLines+1):  # do iLine=1,nmpb(iFile,1)
             line = inFile.readline()
@@ -332,7 +339,7 @@ def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,
         
     
     # Read the Perturbations series:
-    ir = 0
+    ir=0
     ipt = 0
     icount = 0
     s = 0.0
@@ -344,9 +351,9 @@ def elp_mpp02_read_files(w,eart,peri, zeta,dela,  p,delnu,dele,delg,delnp,delep,
     
     for iFile in range(1,4):  # do iFile=1,3  # These used to be three files
         for it in range(4):   # do it=0,3
+            #if(nerr!=0): return 6
             line = inFile.readline()
             nper[iFile,it,1],ipt = formatPertHeader.read(line)
-            #if(nerr!=0): return 6
             
             nper[iFile,it,2] = ir+1
             nper[iFile,it,3] = nper[iFile,it,1] + nper[iFile,it,2] - 1
@@ -400,6 +407,8 @@ def elp_dms2rad(deg,min,sec):
 ## \retval  rad  Distance (AU)
 
 def elp_mpp02_lbr(jd, mode):
+    print("Compute lbr:")
+    
     xyz,vxyz, ierr = elp_mpp02_xyz(jd, mode)
     
     # Compute ecliptic l,b,r:
@@ -411,7 +420,7 @@ def elp_mpp02_lbr(jd, mode):
     
     #rad = rad/1.49597870700e8  # km -> AU
     
-    #print('jd, xyz: ', jd, xyz[1:4])
+    print('jd, xyz: ', jd, xyz[1:4])
     # print(jd, (lon%pi2)*r2d, lat*r2d, rad)
     
     return lon,lat,rad
@@ -461,13 +470,15 @@ def elp_mpp02_lbr(jd, mode):
 ##      elp82b_lbr() above is known to underperform (by a factor of 10) in accuracy.
   
 def elp_mpp02_xyz(jd, mode):
-    global nmpb,cmpb,fmpb, nper,cper,fper
-    global w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    print("Compute xyz:")
     
     # Constants:
     a405=384747.9613701725
     aelp=384747.980674318
     sc=36525  # Moon mean distance for DE405 und ELP; Julian century in days
+    
+    global nmpb,cmpb,fmpb, nper,cper,fper
+    global w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
     
     # Initialise data and read files if needed:
     ierr = elp_mpp02_initialise_and_read_files(mode)
@@ -529,6 +540,9 @@ def elp_mpp02_xyz(jd, mode):
     
     v[1] = v[1] % pi2
     
+    print('t: ', t[0],t[1],t[2],t[3],t[4])
+    print('v:       ', v[1]*r2d,v[2]*r2d,v[3], v[4],v[5],v[6])
+    
     #lambda = v[1]
     #beta = v[2]
     #rad = v[3]
@@ -543,10 +557,13 @@ def elp_mpp02_xyz(jd, mode):
     sbeta  = m.sin(v[2])
     cw     = v[3]*cbeta
     sw     = v[3]*sbeta
+    print("c/s l/b: ", clamb,slamb, cbeta,sbeta)
     
     x1     = cw*clamb
     x2     = cw*slamb
     x3     = sw
+    print("x1,x2,x3: ",x1,x2,x3)
+    print("p,q: ", p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
     
     # Is this simply precession in rectangular coordinates from EoD to J2000?
     pw     = (p1 + p2*t[1] + p3*t[2] + p4*t[3] + p5*t[4]) * t[1]
@@ -593,3 +610,6 @@ def elp_mpp02_xyz(jd, mode):
     
     return xyz,vxyz, ierr
 #***************************************************************************************************
+  
+  
+  
