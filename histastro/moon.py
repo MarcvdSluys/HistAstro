@@ -1,5 +1,38 @@
-"""HistAstro Moon functions"""
+"""HistAstro Moon functions
 
+This module uses the semi-analytical Lunar solution ELP2000/MPP02 to compute the position of the Moon in the
+dynamical mean ecliptic and equinox of J2000.  This Python code has been translated from the Fortran version
+in libTheSky.
+
+
+Remarks:
+
+The nominal values of some constants have to be corrected.  There are two sets of corrections, one of which
+can be chosen using the parameter 'mode' (used in e.g. elp_mpp02_initialise()):
+
+- mode=0, the constants are fitted to LLR observations provided from 1970 to 2001;
+
+- mode=1, the constants are fitted to DE405 ephemeris over one century (1950-2060); the lunar angles W1, W2,
+  W3 receive also additive corrections to the secular coefficients.  This is known as the 'historical mode'
+  and hence the default in this version.
+
+When the mode is changed, the constants will be reinitialised and the data file reread.
+
+
+References:
+ 
+- ELPdoc: Lunar solution ELP, version ELP/MPP02, Jean Chapront and Gerard Francou, October 2002
+
+- Data files and Fortran code: ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/
+
+- Refereed article: Chapront J., Francou G., A&A 404, 735 (2003)
+
+- libTheSky: http://libthesky.sourceforge.net/
+
+"""
+
+
+##############################################################################################################
 import math as m
 import numpy.core as np
 import sys
@@ -36,58 +69,50 @@ delnu=0.; dele=0.; delg=0.; delnp=0.; delep=0.; dtasm=0.; am=0.
 
 
 
-#***************************************************************************************************
-def elp_mpp02_initialise_and_read_files(mode):
+##############################################################################################################
+def elp_mpp02_initialise_and_read_files(mode=1):
+    """Initialise ELP/MPP02 constants and read the data files if necessary
+    
+    Input parameters:
+    
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
+      (historical = default)
+    
+    """
+    
     global modeInit
-    print("Initialise and read files:", modeInit)
+    #print("Initialise and read files:", modeInit)
     
     # Initializing of constants and reading the files:
     ierr = 0
     if(mode!=modeInit):
         elp_mpp02_initialise(mode)
         ierr = elp_mpp02_read_files()
-        print("init_and_read ierr:", ierr)
         if(ierr!=0): return ierr
         
         modeInit = mode  # Indicate that the data have been initialised
-        print("modeInit:", modeInit)
+        #print("modeInit:", modeInit)
         return ierr
         
     return ierr
-#***************************************************************************************************
 
 
 
-#***************************************************************************************************
-#> \brief  Initialization of the constants and parameters used for the evaluation of the ELP/MPP02 series
-##
-## \param mode  Index of the corrections to the constants: 0: LLR observations for 1970-2000, 1: DE405 ephemeris for 1950-2060
-##
-## \retval elp_mpp02_constants  Set of the constants of ELPMPP02 solution (module)
-##
-## \note
-##
-## - Remarks:
-##    The nominal values of some constants have to be corrected.  There are two sets of corrections, one of which can be chosen
-##    using the parameter 'mode' (used in elp_mpp02_initialise()):
-##    - mode=0, the constants are fitted to LLR observations provided from 1970 to 2001; it is the default value;
-##    - mode=1, the constants are fitted to DE405 ephemeris over one century (1950-2060); the lunar angles W1, W2, W3 receive also additive corrections to the secular coefficients.
-## 
-## - Moon constants:
-##    nu        : mean motion of the Moon (W1(1,1))                 (Nu)
-##    g         : half coefficient of sin(F) in latitude         (Gamma)
-##    e         : half coefficient of sin(l) in longitude            (E)
-##    np        : mean motion of EMB (eart(1))                      (n')
-##    ep        : eccentricity of EMB                               (e')
-##
-##    p is the precession rate and t is the time
-##
-## \see
-##   - ELPdoc: Lunar solution ELP, version ELP/MPP02,  Jean Chapront and Gerard Francou, October 2002
-
-def elp_mpp02_initialise(mode):
-    global modeInit,  w,eart,peri, dela,zeta,  p,delnu,dele,delg,delnp,delep,dtasm,am,  p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
-    print("Initialise:", modeInit)
+##############################################################################################################
+def elp_mpp02_initialise(mode=1):
+    """Initialization of the constants and parameters used for the evaluation of the ELP/MPP02 series
+    
+    Input parameters:
+    
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
+      (historical = default)
+    
+    """
+    
+    
+    global modeInit,  w,eart,peri, dela,zeta,  p,delnu,dele,delg,delnp,delep,dtasm,am
+    global p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
+    #print("Initialise:", modeInit)
     
     Dprec = -0.29965  # Constant for the correction to the constant of precession - source: IAU 2000A
     
@@ -107,74 +132,74 @@ def elp_mpp02_initialise(mode):
     
     
     # Corrections to constants:
-    if(mode==0):  # Default - LLR
-       # Values of the corrections to the constants fitted to LLR.  Fit 13-05-02 (2 iterations) except Phi and eps w2_1 and w3_1
-       # See ELPdoc, Table 3 and paper, Table 1
-       Dw1_0   = -0.10525
-       Dw2_0   =  0.16826
-       Dw3_0   = -0.10760
-       Deart_0 = -0.04012
-       Dperi   = -0.04854
-       Dw1_1   = -0.32311
-       Dgam    =  0.00069
-       De      =  0.00005
-       Deart_1 =  0.01442
-       Dep     =  0.00226
-       Dw2_1   =  0.08017
-       Dw3_1   = -0.04317
-       Dw1_2   = -0.03794
-    else:  # DE 405
-       # Values of the corrections to the constants fitted to DE405 over the time interval (1950-2060)
-       Dw1_0   = -0.07008
-       Dw2_0   =  0.20794
-       Dw3_0   = -0.07215
-       Deart_0 = -0.00033
-       Dperi   = -0.00749
-       Dw1_1   = -0.35106
-       Dgam    =  0.00085
-       De      = -0.00006
-       Deart_1 =  0.00732
-       Dep     =  0.00224
-       Dw2_1   =  0.08017
-       Dw3_1   = -0.04317
-       Dw1_2   = -0.03743
-
+    if(mode==0):  # LLR
+        # Values of the corrections to the constants fitted to LLR.  Fit 13-05-02 (2 iterations) except Phi
+        # and eps w2_1 and w3_1.  See ELPdoc, Table 3 and paper, Table 1
+        Dw1_0   = -0.10525
+        Dw2_0   =  0.16826
+        Dw3_0   = -0.10760
+        Deart_0 = -0.04012
+        Dperi   = -0.04854
+        Dw1_1   = -0.32311
+        Dgam    =  0.00069
+        De      =  0.00005
+        Deart_1 =  0.01442
+        Dep     =  0.00226
+        Dw2_1   =  0.08017
+        Dw3_1   = -0.04317
+        Dw1_2   = -0.03794
+    else:  # DE 405 (default)
+        # Values of the corrections to the constants fitted to DE405 over the time interval (1950-2060)
+        Dw1_0   = -0.07008
+        Dw2_0   =  0.20794
+        Dw3_0   = -0.07215
+        Deart_0 = -0.00033
+        Dperi   = -0.00749
+        Dw1_1   = -0.35106
+        Dgam    =  0.00085
+        De      = -0.00006
+        Deart_1 =  0.00732
+        Dep     =  0.00224
+        Dw2_1   =  0.08017
+        Dw3_1   = -0.04317
+        Dw1_2   = -0.03743
+        
     # Fundamental arguments (Moon and EMB - ELPdoc, Table 1):
     # W1: mean longitude of the Moon:
-    w[0,0]  = elp_dms2rad(218,18,59.95571+Dw1_0)      # Source: ELP
+    w[0,0]  = elp_dms2rad(218,18,59.95571+Dw1_0)      # Source: ELP - mean motion of the Moon (nu)
     w[0,1]  = (1732559343.73604+Dw1_1)/r2as           # Source: ELP
     w[0,2]  = (        -6.8084 +Dw1_2)/r2as           # Source: DE405
-    w[0,3]  =          0.66040e-2/r2as                  # Source: ELP
-    w[0,4]  =         -0.31690e-4/r2as                  # Source: ELP
+    w[0,3]  =          0.66040e-2/r2as                # Source: ELP
+    w[0,4]  =         -0.31690e-4/r2as                # Source: ELP
     
     # W2: mean longitude of the lunar perigee:
     w[1,0]  = elp_dms2rad( 83,21,11.67475+Dw2_0)      # Source: ELP
     w[1,1]  = (  14643420.3171 +Dw2_1)/r2as           # Source: DE405
     w[1,2]  = (       -38.2631)/r2as                  # Source: DE405
-    w[1,3]  =         -0.45047e-1/r2as                  # Source: ELP
-    w[1,4]  =          0.21301e-3/r2as                  # Source: ELP
+    w[1,3]  =         -0.45047e-1/r2as                # Source: ELP
+    w[1,4]  =          0.21301e-3/r2as                # Source: ELP
     
     # W3: mean longitude of the lunar ascending node:
     w[2,0]  = elp_dms2rad(125, 2,40.39816+Dw3_0)      # Source: ELP
     w[2,1]  = (  -6967919.5383 +Dw3_1)/r2as           # Source: DE405
     w[2,2]  =          6.3590/r2as                    # Source: DE405
-    w[2,3]  =          0.76250e-2/r2as                  # Source: ELP
-    w[2,4]  =         -0.35860e-4/r2as                  # Source: ELP
+    w[2,3]  =          0.76250e-2/r2as                # Source: ELP
+    w[2,4]  =         -0.35860e-4/r2as                # Source: ELP
     
     # Earth-Moon (EMB) elements:
     # Te: mean longitude of EMB:
-    eart[0] = elp_dms2rad(100,27,59.13885+Deart_0)    # Source: VSOP2000
+    eart[0] = elp_dms2rad(100,27,59.13885+Deart_0)    # Source: VSOP2000 - mean motion of EMB (n')
     eart[1] = (129597742.29300 +Deart_1)/r2as         # Source: VSOP2000
     eart[2] =         -0.020200/r2as                  # Source: ELP
-    eart[3] =          0.90000e-5/r2as                  # Source: ELP
-    eart[4] =          0.15000e-6/r2as                  # Source: ELP
+    eart[3] =          0.90000e-5/r2as                # Source: ELP
+    eart[4] =          0.15000e-6/r2as                # Source: ELP
     
     # Pip: mean longitude of the perihelion of EMB:
     peri[0] = elp_dms2rad(102,56,14.45766+Dperi)      # Source: VSOP2000
     peri[1] =       1161.24342/r2as                   # Source: VSOP2000
     peri[2] =          0.529265/r2as                  # Source: VSOP2000
-    peri[3] =         -0.11814e-3/r2as                  # Source: VSOP2000
-    peri[4] =          0.11379e-4/r2as                  # Source: VSOP2000
+    peri[3] =         -0.11814e-3/r2as                # Source: VSOP2000
+    peri[4] =          0.11379e-4/r2as                # Source: VSOP2000
     
     # Corrections to the secular terms of Moon angles.  This gives a better (long-term?) fit
     #   to DE 406.  See ELPdoc, Table 6/paper, Table 4, line 2:
@@ -189,7 +214,8 @@ def elp_mpp02_initialise(mode):
        w[2,3] -= 0.00010712/r2as
 
     
-    # Corrections to the mean motions of the Moon angles W2 and W3, infered from the modifications of the constants:
+    # Corrections to the mean motions of the Moon angles W2 and W3, infered from the modifications of the
+    # constants:
     x2     =   w[1,1] / w[0,1]
     x3     =   w[2,1] / w[0,1]
     y2     =   am*bp[1,1] + xa*bp[5,1]
@@ -253,13 +279,14 @@ def elp_mpp02_initialise(mode):
     zeta[4] = w[0,4]
     
     # Corrections to the parameters: Nu, E, Gamma, n' et e' (Source: ELP):
-    delnu  = (+0.55604+Dw1_1)/r2as/w[0,1]                 # Correction to the mean motion of the Moon
-    dele   = (+0.01789+De)/r2as                           # Correction to the half coefficient of sin(l) in longitude
-    delg   = (-0.08066+Dgam)/r2as                         # Correction to the half coefficient of sin(F) in latitude
-    delnp  = (-0.06424+Deart_1)/r2as/w[0,1]               # Correction to the mean motion of EMB
-    delep  = (-0.12879+Dep)/r2as                          # Correction to the eccentricity of EMB
+    delnu  = (+0.55604+Dw1_1)/r2as/w[0,1]         # Correction to the mean motion of the Moon
+    dele   = (+0.01789+De)/r2as                   # Correction to the half coefficient of sin(l) in longitude
+    delg   = (-0.08066+Dgam)/r2as                 # Correction to the half coefficient of sin(F) in latitude
+    delnp  = (-0.06424+Deart_1)/r2as/w[0,1]       # Correction to the mean motion of EMB
+    delep  = (-0.12879+Dep)/r2as                  # Correction to the eccentricity of EMB
     
-    # Precession of the longitude of the ascending node of the mean ecliptic of date on fixed ecliptic J2000 (Laskar, 1986):
+    # Precession of the longitude of the ascending node of the mean ecliptic of date on fixed ecliptic J2000
+    # (Laskar, 1986):
     # P: sine coefficients:
     p1 =  0.10180391e-4
     p2 =  0.47020439e-6
@@ -275,24 +302,20 @@ def elp_mpp02_initialise(mode):
     q5 = -0.320334e-14
     
     return
-#***************************************************************************************************
   
   
 
-#***************************************************************************************************
-#> \brief  Read the six data files containing the ELP/MPP02 series
-##
-## \retval ierr      File error index: ierr=0: no error, ierr=1: file error
-##
-## \note
-## - module elp_mpp02_constants:  Set of the constants of ELP/MPP02 solution (input)
-## - module elp_mpp02_series:  Series of the ELP/MPP02 solution (output)
-##
-## \see
-## - Data files: ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/
-  
+##############################################################################################################
 def elp_mpp02_read_files():
-    print("Read files:")
+    """Read the six data files containing the ELP/MPP02 series
+    
+    Return values:
+    
+    - ierr: File error index: ierr=0: no error, ierr=1: file error
+    
+    """
+    
+    #print("Read files:")
     global nmpb,cmpb,fmpb, nper,cper,fper
     global w,eart,peri, dela,zeta,  p,delnu,dele,delg,delnp,delep,dtasm,am
     
@@ -315,8 +338,9 @@ def elp_mpp02_read_files():
             inFile = open(fileName,'r')
         except:
             sys.stderr.write('Error opening file: '+fileName+'\n')
-            sys.stderr.write('  1) did you download the data files ELP_*.S[123] from ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/ ?\n')
-            sys.stderr.write('  2) did you set the variable histastro.moon.dataDir to the correct value?\n')
+            sys.stderr.write(' 1) did you download the data files ELP_*.S[123] from '+ \
+            'ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/ ?\n')
+            sys.stderr.write(' 2) did you set the variable histastro.moon.dataDir to the correct value?\n')
             exit(1)
         
         line = inFile.readline()
@@ -345,10 +369,10 @@ def elp_mpp02_read_files():
             ir += 1
             
         inFile.close()
-
+        
     
     # Read the Perturbations series:
-    ir=0
+    ir = 0
     ipt = 0
     icount = 0
     s = 0.0
@@ -378,7 +402,8 @@ def elp_mpp02_read_files():
             nLines = int(round(nper[iFile,it,0]))
             for iLine in range(nLines):
                 line = inFile.readline()
-                icount,s,c,ifi[0],ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10],ifi[11],ifi[12],ifi[13],ifi[14],ifi[15] = formatPertBody.read(line)
+                icount,s,c,ifi[0],ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10], \
+                    ifi[11],ifi[12],ifi[13],ifi[14],ifi[15] = formatPertBody.read(line)
                 #if(nerr!=0): return 7
                 
                 cper[ir] = m.sqrt(c**2+s**2)
@@ -401,29 +426,40 @@ def elp_mpp02_read_files():
         
     return 0
     
-#***************************************************************************************************
-  
-  
-#***************************************************************************************************
-#> \brief Function for the conversion: sexagesimal degrees -> radians
+
+
+##############################################################################################################
 def elp_dms2rad(deg,min,sec):
+    """Function for the conversion sexagesimal degrees -> radians in elp_mpp02_initialise()"""
+    
     return (deg+min/60+sec/3600) * d2r
-#***************************************************************************************************
 
 
-#*********************************************************************************************************************************
-#> \brief  Compute the spherical lunar coordinates using the ELP2000/MPP02 lunar theory in the dynamical mean ecliptic and
-##           equinox of J2000.
-##
-## \param jd    Julian day to compute Moon position for
-## \param mode  Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060 (historical)
-##
-## \retval  lon  Ecliptic longitude (rad)
-## \retval  lat  Ecliptic latitude (rad)
-## \retval  rad  Distance (AU)
 
-def elp_mpp02_lbr(jd, mode):
-    print("Compute lbr:")
+
+##############################################################################################################
+def elp_mpp02_lbr(jd, mode=1):
+    """Compute the spherical lunar coordinates using the ELP2000/MPP02 lunar theory in the dynamical mean ecliptic
+          and equinox of J2000.
+    
+    Input parameters:
+    
+    - jd: Julian day to compute Moon position for
+    
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
+      (historical = default)
+    
+    Return values:
+    
+    - lon: Ecliptic longitude (rad)
+    
+    - lat: Ecliptic latitude (rad)
+    
+    - rad: Distance (km)
+
+    """
+
+    #print("Compute lbr:")
     
     xyz,vxyz, ierr = elp_mpp02_xyz(jd, mode)
     
@@ -436,39 +472,37 @@ def elp_mpp02_lbr(jd, mode):
     
     #rad = rad/1.49597870700e8  # km -> AU
     
-    print('jd, xyz: ', jd, xyz[0:3])
+    #print('jd, xyz: ', jd, xyz[0:3])
     # print(jd, (lon%pi2)*r2d, lat*r2d, rad)
     
     return lon,lat,rad
-#*********************************************************************************************************************************
 
 
-#***************************************************************************************************
-#> \brief  Compute the rectangular lunar coordinates using the ELP/MPP02 lunar theory in the dynamical mean ecliptic and equinox of J2000.
-##
-## \param jd    Julian day to compute Moon position for
-## \param mode  Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060 (historical)
-## 
-## \retval xyz   Geocentric rectangular coordinates:
-##               - xyz(1) : Position X (km)
-##               - xyz(2) : Position Y (km)
-##               - xyz(3) : Position Z (km)
-## \retval vxyz  Geocentric rectangular velocities:
-##               - vxyz(1) : Velocity X' (km/day)
-##               - vxyz(2) : Velocity Y' (km/day)
-##               - vxyz(3) : Velocity Z' (km/day)
-## \retval ierr  File error index - ierr=0: no error, ierr=1: file error
-##
-## \note
-##  - The nominal values of some constants have to be corrected.  There are two sets of corrections, which can be selected
-##    using the parameter 'mode' (used in elp_mpp02_initialise()).
-##    - mode=0, the constants are fitted to LLR observations provided from 1970 to 2001; it is the default value;
-##    - mode=1, the constants are fitted to DE405 ephemeris over one century (1950-2060); the lunar angles W1, W2, W3
-##              receive also additive corrections to the secular coefficients ('historical mode').
-##    When the mode is changed, the data must be reinitialised and the data file reread.
+
   
-def elp_mpp02_xyz(jd, mode):
-    print("Compute xyz:")
+##############################################################################################################
+def elp_mpp02_xyz(jd, mode=1):
+    """Compute the rectangular lunar coordinates using the ELP/MPP02 lunar theory in the dynamical mean ecliptic
+    and equinox of J2000.
+    
+    Input parameters:
+    
+    - jd: Julian day to compute Moon position for
+    
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
+      (historical)
+    
+    Return value:
+    
+    - xyz(3): Geocentric rectangular coordinates (km)
+    
+    - vxyz(3): Geocentric rectangular velocities (km/day):
+    
+    - ierr: File error index - ierr=0: no error, ierr=1: file error
+
+    """
+    
+    #print("Compute xyz:")
     global nmpb,cmpb,fmpb, nper,cper,fper
     global w, p1,p2,p3,p4,p5, q1,q2,q3,q4,q5
     
@@ -531,14 +565,14 @@ def elp_mpp02_xyz(jd, mode):
             
         
     # Compute the spherical coordinates for the mean inertial ecliptic and equinox of date:
-    v[0] = v[0]/r2as + w[0,0] + w[0,1]*t[1] + w[0,2]*t[2] + w[0,3]*t[3] + w[0,4]*t[4]  # Longitude + mean longitude (rad)
+    v[0] = v[0]/r2as + w[0,0] + w[0,1]*t[1] + w[0,2]*t[2] + w[0,3]*t[3] + w[0,4]*t[4]  # Longitude + mean lon. (rad)
     v[1] = v[1]/r2as                                                                   # Latitude (rad)
     v[2] = v[2] * a405 / aelp                                                          # Distance (km)
     
     # v[0] = v[0] % pi2
     
-    print('t: ', t[0],t[1],t[2],t[3],t[4])
-    print('v:       ', v[0]*r2d,v[1]*r2d,v[2], v[3],v[4],v[5])
+    #print('t: ', t[0],t[1],t[2],t[3],t[4])
+    #print('v:       ', v[0]*r2d,v[1]*r2d,v[2], v[3],v[4],v[5])
     
     # compute the rectangular coordinates (for the EoD?):
     clamb  = m.cos(v[0])
@@ -547,13 +581,13 @@ def elp_mpp02_xyz(jd, mode):
     sbeta  = m.sin(v[1])
     cw     = v[2]*cbeta
     sw     = v[2]*sbeta
-    print("c/s l/b: ", clamb,slamb, cbeta,sbeta)
+    #print("c/s l/b: ", clamb,slamb, cbeta,sbeta)
     
     x0     = cw*clamb
     x1     = cw*slamb
     x2     = sw
-    print("x1,x2,x3: ", x0,x1,x2)
-    print("p,q: ", p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
+    #print("x1,x2,x3: ", x0,x1,x2)
+    #print("p,q: ", p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
     
     # Is this simply precession in rectangular coordinates from EoD to J2000?
     pw     = (p1 + p2*t[1] + p3*t[2] + p4*t[3] + p5*t[4]) * t[1]
@@ -570,10 +604,6 @@ def elp_mpp02_xyz(jd, mode):
     xyz[0] =  pw2*x0  + pwqw*x1 + pwra*x2
     xyz[1] =  pwqw*x0 + qw2*x1  - qwra*x2
     xyz[2] = -pwra*x0 + qwra*x1 + (pw2+qw2-1)*x2
-    
-    #xyz[0] = x0
-    #xyz[1] = x1
-    #xyz[2] = x2
     
     
     # Compute the rectangular velocities for the equinox J2000:
@@ -593,13 +623,10 @@ def elp_mpp02_xyz(jd, mode):
     ppwra  = ppw*ra + pw*rap
     qpwra  = qpw*ra + qw*rap
     
-    vxyz = np.zeros(4)  # vxyz(3)
+    vxyz = np.zeros(3)
     vxyz[0] = (pw2*xp1 + pwqw*xp2 + pwra*xp3  +  ppw2*x0 + ppwqpw*x1 + ppwra*x2) / sc
     vxyz[1] = (pwqw*xp1 + qw2*xp2 - qwra*xp3  +  ppwqpw*x0 + qpw2*x1 - qpwra*x2) / sc
     vxyz[2] = (-pwra*xp1 + qwra*xp2 + (pw2+qw2-1)*xp3  -  ppwra*x0 + qpwra*x1 + (ppw2+qpw2)*x2) / sc
     
     return xyz,vxyz, ierr
-#***************************************************************************************************
-  
-  
-  
+
