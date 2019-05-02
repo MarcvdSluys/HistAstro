@@ -4,7 +4,7 @@ import math as m
 import numpy.core as np
 import sys
 
-# Constants:
+# Global constants:
 d2r    = m.radians(1)  # Degrees to radians
 r2d    = m.degrees(1)  # Radians to degrees
 r2as   = r2d*3600      # Radians to arcseconds
@@ -15,6 +15,7 @@ jd2000 = 2451545
 
 # Global variables:
 modeInit = 999  # := uninitialised
+dataDir = '.'   # Directory where the data files are located (default '.': the current directory)
 
 nmpb = np.zeros((3,3))
 cmpb = np.zeros(2645)
@@ -309,8 +310,14 @@ def elp_mpp02_read_files():
     
     
     for iFile in range(3):  # Main-problem files 1-3
-        fileName = 'data/ELP_MAIN.S'+str(iFile+1)
-        inFile = open(fileName,'r')
+        fileName = dataDir+'/ELP_MAIN.S'+str(iFile+1)
+        try:
+            inFile = open(fileName,'r')
+        except:
+            sys.stderr.write('Error opening file: '+fileName+'\n')
+            sys.stderr.write('  1) did you download the data files ELP_*.S[123] from ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/ ?\n')
+            sys.stderr.write('  2) did you set the variable histastro.moon.dataDir to the correct value?\n')
+            exit(1)
         
         line = inFile.readline()
         nmpb[iFile,0] = formatMainHeader.read(line)[0]
@@ -352,8 +359,13 @@ def elp_mpp02_read_files():
     formatPertBody   = ff.FortranRecordReader('(I5,2D20.13,16I3)')  # Perturbation body format
     
     for iFile in range(3):  # Perturbation files 1-3
-        fileName = 'data/ELP_PERT.S'+str(iFile+1)
-        inFile = open(fileName,'r')
+        fileName = dataDir+'/ELP_PERT.S'+str(iFile+1)
+        try:
+            inFile = open(fileName,'r')
+        except:
+            sys.stderr.write('Error opening file: '+fileName+'\n')
+            exit(1)
+            
         for it in range(4):
             #if(nerr!=0): return 6
             line = inFile.readline()
