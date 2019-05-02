@@ -343,7 +343,7 @@ def elp_mpp02_read_files():
     icount = 0
     s = 0.0
     c = 0.0
-    ifi = np.zeros(16)  # int ifi(16)
+    ifi = np.zeros(16)  # will contain ints
     
     formatPertHeader = ff.FortranRecordReader('(25x,2I10)')         # Perturbation header format
     formatPertBody   = ff.FortranRecordReader('(I5,2D20.13,16I3)')  # Perturbation body format
@@ -412,14 +412,14 @@ def elp_mpp02_lbr(jd, mode):
     
     # Compute ecliptic l,b,r:
     rad = m.sqrt(sum(xyz**2))
-    lon = m.atan2(xyz[2], xyz[1])
-    lat = m.asin(xyz[3]/rad)
+    lon = m.atan2(xyz[1], xyz[0])
+    lat = m.asin(xyz[2]/rad)
     
     # precess_ecl(jd2000,jd, lon,lat)
     
     #rad = rad/1.49597870700e8  # km -> AU
     
-    print('jd, xyz: ', jd, xyz[1:4])
+    print('jd, xyz: ', jd, xyz[0:3])
     # print(jd, (lon%pi2)*r2d, lat*r2d, rad)
     
     return lon,lat,rad
@@ -467,7 +467,7 @@ def elp_mpp02_xyz(jd, mode):
     
     # Initialization of time powers:
     rjd  = jd - jd2000  # Reduced JD - JD since 2000
-    t = np.zeros(5)  # t(-1:4) - -1 used to prevent compiler warnings?
+    t = np.zeros(5)
     t[0] = 1
     t[1] = rjd/sc       # t: time since 2000 in Julian centuries
     t[2] = t[1]**2      # t^2
@@ -475,7 +475,7 @@ def elp_mpp02_xyz(jd, mode):
     t[4] = t[2]**2      # t^4
     
     # Evaluation of the series: substitution of time in the series
-    v = np.zeros(6)  # v(6)
+    v = np.zeros(6)
     for iVar in range(3):  # iVar=0,1,2: Longitude, Latitude, Distance
         
         # Main Problem series:
@@ -514,9 +514,9 @@ def elp_mpp02_xyz(jd, mode):
             
         
     # Compute the spherical coordinates for the mean inertial ecliptic and equinox of date:
-    v[0]   = v[0]/r2as + w[0,0] + w[0,1]*t[1] + w[0,2]*t[2] + w[0,3]*t[3] + w[0,4]*t[4]  # Longitude + mean longitude (rad)
-    v[1]   = v[1]/r2as                                                                   # Latitude (rad)
-    v[2]   = v[2] * a405 / aelp                                                          # Distance (km)
+    v[0] = v[0]/r2as + w[0,0] + w[0,1]*t[1] + w[0,2]*t[2] + w[0,3]*t[3] + w[0,4]*t[4]  # Longitude + mean longitude (rad)
+    v[1] = v[1]/r2as                                                                   # Latitude (rad)
+    v[2] = v[2] * a405 / aelp                                                          # Distance (km)
     
     # v[0] = v[0] % pi2
     
@@ -532,10 +532,10 @@ def elp_mpp02_xyz(jd, mode):
     sw     = v[2]*sbeta
     print("c/s l/b: ", clamb,slamb, cbeta,sbeta)
     
-    x1     = cw*clamb
-    x2     = cw*slamb
-    x3     = sw
-    print("x1,x2,x3: ",x1,x2,x3)
+    x0     = cw*clamb
+    x1     = cw*slamb
+    x2     = sw
+    print("x1,x2,x3: ", x0,x1,x2)
     print("p,q: ", p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
     
     # Is this simply precession in rectangular coordinates from EoD to J2000?
@@ -549,22 +549,22 @@ def elp_mpp02_xyz(jd, mode):
     pwra   = pw*ra
     qwra   = qw*ra
     
-    xyz = np.zeros(4)  # xyz(3)
-    xyz[1] =  pw2*x1  + pwqw*x2 + pwra*x3
-    xyz[2] =  pwqw*x1 + qw2*x2  - qwra*x3
-    xyz[3] = -pwra*x1 + qwra*x2 + (pw2+qw2-1)*x3
+    xyz = np.zeros(3)
+    xyz[0] =  pw2*x0  + pwqw*x1 + pwra*x2
+    xyz[1] =  pwqw*x0 + qw2*x1  - qwra*x2
+    xyz[2] = -pwra*x0 + qwra*x1 + (pw2+qw2-1)*x2
     
+    #xyz[0] = x0
     #xyz[1] = x1
     #xyz[2] = x2
-    #xyz[3] = x3
     
     
     # Compute the rectangular velocities for the equinox J2000:
     v[3]   = v[3]/r2as + w[0,1] + 2*w[0,2]*t[1] + 3*w[0,3]*t[2] + 4*w[0,4]*t[3]
     v[4]   = v[4]/r2as
     
-    xp1    = (v[5]*cbeta - v[4]*sw)*clamb - v[3]*x2
-    xp2    = (v[5]*cbeta - v[4]*sw)*slamb + v[3]*x1
+    xp1    = (v[5]*cbeta - v[4]*sw)*clamb - v[3]*x1
+    xp2    = (v[5]*cbeta - v[4]*sw)*slamb + v[3]*x0
     xp3    = v[5]*sbeta  + v[4]*cw
     
     ppw    = p1 + (2*p2 + 3*p3*t[1] + 4*p4*t[2] + 5*p5*t[3]) * t[1]
@@ -577,9 +577,9 @@ def elp_mpp02_xyz(jd, mode):
     qpwra  = qpw*ra + qw*rap
     
     vxyz = np.zeros(4)  # vxyz(3)
-    vxyz[1] = (pw2*xp1 + pwqw*xp2 + pwra*xp3  +  ppw2*x1 + ppwqpw*x2 + ppwra*x3) / sc
-    vxyz[2] = (pwqw*xp1 + qw2*xp2 - qwra*xp3  +  ppwqpw*x1 + qpw2*x2 - qpwra*x3) / sc
-    vxyz[3] = (-pwra*xp1 + qwra*xp2 + (pw2+qw2-1)*xp3  -  ppwra*x1 + qpwra*x2 + (ppw2+qpw2)*x3) / sc
+    vxyz[0] = (pw2*xp1 + pwqw*xp2 + pwra*xp3  +  ppw2*x0 + ppwqpw*x1 + ppwra*x2) / sc
+    vxyz[1] = (pwqw*xp1 + qw2*xp2 - qwra*xp3  +  ppwqpw*x0 + qpw2*x1 - qpwra*x2) / sc
+    vxyz[2] = (-pwra*xp1 + qwra*xp2 + (pw2+qw2-1)*xp3  -  ppwra*x0 + qpwra*x1 + (ppw2+qpw2)*x2) / sc
     
     return xyz,vxyz, ierr
 #***************************************************************************************************
