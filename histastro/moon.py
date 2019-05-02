@@ -117,10 +117,8 @@ def elp_mpp02_initialise(mode=1):
     Dprec = -0.29965  # Constant for the correction to the constant of precession - source: IAU 2000A
     
     
-    #bp = np.array([[0.311079095,-0.4482398e-2], [-0.110248500e-2,0.1056062e-2], [0.50928e-4,-0.103837907],
-    #               [0.6682870e-3,-0.129807200e-2], [-0.1780280e-3,-0.37342e-4]]) # (5,2)
-    bp = np.array([[0,0,0], [0,0.311079095,-0.4482398e-2], [0,-0.110248500e-2,0.1056062e-2], [0,0.50928e-4,-0.103837907],
-                   [0,0.6682870e-3,-0.129807200e-2], [0,-0.1780280e-3,-0.37342e-4]])  # (5,2) -> (6,3) with first row/column 0
+    bp = np.array([[0.311079095,-0.4482398e-2], [-0.110248500e-2,0.1056062e-2], [0.50928e-4,-0.103837907],
+                   [0.6682870e-3,-0.129807200e-2], [-0.1780280e-3,-0.37342e-4]]) # (5,2)
     
     if(mode<0 or mode>1): sys.exit('elp_mpp02_initialise(): mode must have value 0 or 1, not %i' % mode)
     
@@ -218,19 +216,19 @@ def elp_mpp02_initialise(mode=1):
     # constants:
     x2     =   w[1,1] / w[0,1]
     x3     =   w[2,1] / w[0,1]
-    y2     =   am*bp[1,1] + xa*bp[5,1]
-    y3     =   am*bp[1,2] + xa*bp[5,2]
+    y2     =   am*bp[0,0] + xa*bp[4,0]
+    y3     =   am*bp[0,1] + xa*bp[4,1]
     
     d21    =   x2 - y2
-    d22    =   w[0,1] * bp[2,1]
-    d23    =   w[0,1] * bp[3,1]
-    d24    =   w[0,1] * bp[4,1]
+    d22    =   w[0,1] * bp[1,0]
+    d23    =   w[0,1] * bp[2,0]
+    d24    =   w[0,1] * bp[3,0]
     d25    =   y2/am
     
     d31    =   x3 - y3
-    d32    =   w[0,1] * bp[2,2]
-    d33    =   w[0,1] * bp[3,2]
-    d34    =   w[0,1] * bp[4,2]
+    d32    =   w[0,1] * bp[1,1]
+    d33    =   w[0,1] * bp[2,1]
+    d34    =   w[0,1] * bp[3,1]
     d35    =   y3/am
     
     Cw2_1  =  d21*Dw1_1+d25*Deart_1+d22*Dgam+d23*De+d24*Dep
@@ -271,7 +269,7 @@ def elp_mpp02_initialise(mode=1):
     p[0:8,2:5] = 0
     
     
-    # Zeta: Mean longitude of the Moon W1 + Rate of precession (pt):
+    # Mean longitude of the Moon W1 + Rate of precession (pt):
     zeta[0] = w[0,0]
     zeta[1] = w[0,1] + (5029.0966+Dprec)/r2as
     zeta[2] = w[0,2]
@@ -338,8 +336,8 @@ def elp_mpp02_read_files():
             inFile = open(fileName,'r')
         except:
             sys.stderr.write('Error opening file: '+fileName+'\n')
-            sys.stderr.write(' 1) did you download the data files ELP_*.S[123] from '+ \
-            'ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/ ?\n')
+            sys.stderr.write(' 1) did you download the data files ELP_*.S[123] from '+
+                             'ftp://cyrano-se.obspm.fr/pub/2_lunar_solutions/2_elpmpp02/ ?\n')
             sys.stderr.write(' 2) did you set the variable histastro.moon.dataDir to the correct value?\n')
             exit(1)
         
@@ -397,13 +395,13 @@ def elp_mpp02_read_files():
             
             nper[iFile,it,1] = ir+1
             nper[iFile,it,2] = nper[iFile,it,0] + nper[iFile,it,1] - 1
-            if(nper[iFile,it,0]==0): continue  # cycle
+            if(nper[iFile,it,0]==0): continue  # cycle to next it
             
             nLines = int(round(nper[iFile,it,0]))
             for iLine in range(nLines):
                 line = inFile.readline()
-                icount,s,c,ifi[0],ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10], \
-                    ifi[11],ifi[12],ifi[13],ifi[14],ifi[15] = formatPertBody.read(line)
+                ( icount,s,c,ifi[0],ifi[1],ifi[2],ifi[3],ifi[4],ifi[5],ifi[6],ifi[7],ifi[8],ifi[9],ifi[10], 
+                  ifi[11],ifi[12],ifi[13],ifi[14],ifi[15] ) = formatPertBody.read(line)
                 #if(nerr!=0): return 7
                 
                 cper[ir] = m.sqrt(c**2+s**2)
@@ -467,8 +465,6 @@ def elp_mpp02_lbr(jd, mode=1):
     rad = m.sqrt(sum(xyz**2))
     lon = m.atan2(xyz[1], xyz[0])
     lat = m.asin(xyz[2]/rad)
-    
-    # precess_ecl(jd2000,jd, lon,lat)
     
     #rad = rad/1.49597870700e8  # km -> AU
     
@@ -589,7 +585,7 @@ def elp_mpp02_xyz(jd, mode=1):
     #print("x1,x2,x3: ", x0,x1,x2)
     #print("p,q: ", p1,p2,p3,p4,p5, q1,q2,q3,q4,q5)
     
-    # Is this simply precession in rectangular coordinates from EoD to J2000?
+    # Is this simply precession in rectangular coordinates to J2000?  From?
     pw     = (p1 + p2*t[1] + p3*t[2] + p4*t[3] + p5*t[4]) * t[1]
     qw     = (q1 + q2*t[1] + q3*t[2] + q4*t[3] + q5*t[4]) * t[1]
     
