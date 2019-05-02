@@ -1,8 +1,9 @@
 """HistAstro Moon functions
 
-This module uses the semi-analytical Lunar solution ELP2000/MPP02 to compute the position of the Moon in the
-dynamical mean ecliptic and equinox of J2000.  This Python code has been translated from the Fortran version
-in libTheSky.
+This module uses the semi-analytical Lunar solution ELP2000/MPP02 to compute the geocentric position of the
+Moon in the dynamical mean ecliptic and equinox of J2000.  This Python code has been translated from the
+Fortran version in libTheSky.
+
 
 
 Remarks:
@@ -10,11 +11,10 @@ Remarks:
 The nominal values of some constants have to be corrected.  There are two sets of corrections, one of which
 can be chosen using the parameter 'mode' (used in e.g. elp_mpp02_initialise()):
 
-- mode=0, the constants are fitted to LLR observations provided from 1970 to 2001;
+- mode=0, the constants are fitted to LLR observations provided from 1970 to 2001 (default);
 
 - mode=1, the constants are fitted to DE405 ephemeris over one century (1950-2060); the lunar angles W1, W2,
-  W3 receive also additive corrections to the secular coefficients.  This is known as the 'historical mode'
-  and hence the default in this version.
+  W3 receive also additive corrections to the secular coefficients.  This is known as the 'historical mode'.
 
 When the mode is changed, the constants will be reinitialised and the data file reread.
 
@@ -28,6 +28,24 @@ References:
 - Refereed article: Chapront J., Francou G., A&A 404, 735 (2003)
 
 - libTheSky: http://libthesky.sourceforge.net/
+
+
+Copyright:
+
+Copyright (c) 2019 Marc van der Sluys, Radboud University Nijmegen, The Netherlands -
+http://astro.ru.nl/~sluys/  (this Python code)
+ 
+This file is part of the ELP/MPP02 Python package, 
+see: [Pypi URL] / [Github URL]
+ 
+This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this code.  If not, see 
+<http://www.gnu.org/licenses/>.
 
 """
 
@@ -70,14 +88,14 @@ delnu=0.; dele=0.; delg=0.; delnp=0.; delep=0.; dtasm=0.; am=0.
 
 
 ##############################################################################################################
-def elp_mpp02_initialise_and_read_files(mode=1):
+def elp_mpp02_initialise_and_read_files(mode=0):
     """Initialise ELP/MPP02 constants and read the data files if necessary
     
     Input parameters:
     
-    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
-      (historical = default)
-    
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations (default), 1-Fit to DE405
+      1950-2060 (historical)
+
     """
     
     global modeInit
@@ -99,14 +117,14 @@ def elp_mpp02_initialise_and_read_files(mode=1):
 
 
 ##############################################################################################################
-def elp_mpp02_initialise(mode=1):
+def elp_mpp02_initialise(mode=0):
     """Initialization of the constants and parameters used for the evaluation of the ELP/MPP02 series
     
     Input parameters:
     
-    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
-      (historical = default)
-    
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations (default), 1-Fit to DE405
+      1950-2060 (historical)
+
     """
     
     
@@ -146,7 +164,7 @@ def elp_mpp02_initialise(mode=1):
         Dw2_1   =  0.08017
         Dw3_1   = -0.04317
         Dw1_2   = -0.03794
-    else:  # DE 405 (default)
+    else:  # DE 405 ('historical')
         # Values of the corrections to the constants fitted to DE405 over the time interval (1950-2060)
         Dw1_0   = -0.07008
         Dw2_0   =  0.20794
@@ -436,7 +454,7 @@ def elp_dms2rad(deg,min,sec):
 
 
 ##############################################################################################################
-def elp_mpp02_lbr(jd, mode=1):
+def elp_mpp02_lbr(jd, mode=0):
     """Compute the spherical lunar coordinates using the ELP2000/MPP02 lunar theory in the dynamical mean ecliptic
           and equinox of J2000.
     
@@ -444,8 +462,8 @@ def elp_mpp02_lbr(jd, mode=1):
     
     - jd: Julian day to compute Moon position for
     
-    - mode: Index of the corrections to the constants: 0-Fit to LLR observations, 1-Fit to DE405 1950-2060
-      (historical = default)
+    - mode: Index of the corrections to the constants: 0-Fit to LLR observations (default), 1-Fit to DE405
+      1950-2060 (historical)
     
     Return values:
     
@@ -477,7 +495,7 @@ def elp_mpp02_lbr(jd, mode=1):
 
   
 ##############################################################################################################
-def elp_mpp02_xyz(jd, mode=1):
+def elp_mpp02_xyz(jd, mode=0):
     """Compute the rectangular lunar coordinates using the ELP/MPP02 lunar theory in the dynamical mean ecliptic
     and equinox of J2000.
     
