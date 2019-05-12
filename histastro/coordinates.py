@@ -3,17 +3,9 @@
 # Modules:
 import math as m
 import numpy.core as np
+from histastro.constants import pi,pi2, r2d,as2r, earthRad,AU
 import histastro.datetime as dt
 
-# Constants:
-pi    = m.pi
-pi2   = 2*pi
-r2d   = m.degrees(1)  # Radians to degrees
-d2r   = 1.0/r2d       # Degrees to radians
-#r2h  = r2d/15
-h2r   = d2r*15        # Hours to radians
-as2r  = d2r/3.6e3     # Arcseconds to radians
-mas2r = as2r/1000.0   # Milliarcseconds to radians
 
 
 def obliquity(jd):
@@ -74,6 +66,51 @@ def precessHip(jd, ra,dec):
     decNew = np.arcsin( np.cos(ra + zeta) * m.sin(theta) * np.cos(dec)  +  m.cos(theta) * np.sin(dec) )
     return raNew,decNew
 
+
+def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0):
+    """ Convert spherical ecliptical coordinates from the geocentric to the topocentric system
+    
+    Input parameters:
+    - gcLon   Geocentric ecliptic longitude (rad)
+    - gcLat   Geocentric ecliptic latitude (rad)
+    - gcDist  Geocentric distance
+    - gcRad   Geocentric semi-diameter (rad)
+    
+    - eps   Obliquity of the ecliptic (rad)
+    - lst   Local sidereal time (rad)
+    
+    - obsLat   Latitude of the observer (rad)
+    - obsEle   Altitude/elevation of the observer above sea level (metres, optional)
+    
+    Return values:
+    - tcLon   Topocentric ecliptic longitude (rad)
+    - tcLat   Topocentric ecliptic latitude (rad)
+    - tcRad   Topocentric semi-diameter (rad)
+    
+    See:
+    - Meeus, Astronomical Algorithms, 1998, Ch. 11 and 40
+    """
+    
+    # Meeus, Ch.11, p.82:
+    ba = 0.996647189335    # b/a = 1-f: flattening of the Earth - WGS84 ellipsoid 
+    re = earthRad*1000     # Equatorial radius of the Earth in metres (same units as the elevation)
+    #                      (http://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf)
+    
+    u  = m.atan(ba*m.tan(obsLat))
+    rs = ba*m.sin(u) + obsEle/re * m.sin(obsLat)
+    rc = m.cos(u)    + obsEle/re * m.cos(obsLat)
+
+    gcDist = 389625.687911882531
+    sinHp = m.sin(earthRad/AU)/(gcDist/AU)  # Sine of the horizontal parallax, Meeus, Eq. 40.1
+    
+    # Meeus, Ch.40, p.282:
+    n  = m.cos(gcLon)*m.cos(gcLat) - rc*sinHp*m.cos(lst)
+    
+    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(rs*m.sin(eps) + rc*m.cos(eps)*m.sin(lst)) , n ) % pi2  # Topocentric longitude
+    tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(rs*m.cos(eps) - rc*m.sin(eps)*m.sin(lst))))/n)         # Topocentric latitude
+    tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/n)                                                   # Topocentric semi-diameter
+    
+    return tcLon,tcLat,tcRad
 
 
 
