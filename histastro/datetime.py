@@ -41,9 +41,9 @@ def gmst(jd):
     tjd  = jd - jd2000                      # Julian Days after 2000.0 UT
     tjd2 = tjd**2
     tjd4 = tjd2**2
-    
-    gmst = 4.89496121042905 + 6.30038809894828323*tjd + 5.05711849e-15*tjd2 - 4.378e-28*tjd2*tjd - 8.1601415e-29*tjd4 \
-        - 2.7445e-36*tjd4*tjd  # Eq. 6.66, removed Delta-T term
+           
+    gmst = 4.89496121088131 + 6.30038809894828323*tjd + 5.05711849e-15*tjd2 - 4.378e-28*tjd2*tjd - 8.1601415e-29*tjd4 \
+        - 2.7445e-36*tjd4*tjd  # Eq. 6.66, removed Delta-T term, hence replaced the first term
     
     return gmst % pi2
 
