@@ -45,16 +45,16 @@ def properMotion(startJD,targetJD, ra,dec, pma,pmd):
     """Compute the proper motion from startJD to targetJD for the positions given in (numpy arrays) ra and dec
     (in rad) and proper motions in pma,pmd (in rad/yr)"""
     
-    dtYr = (targetJD - startJD)/365.25
-    raOld  = ra  + pma*dtYr / np.cos(dec)
-    decOld = dec + pmd*dtYr
-    return raOld,decOld
+    dtYr   = (targetJD - startJD)/365.25
+    raTarget  = ra  + pma*dtYr / np.cos(dec)
+    decTarget = dec + pmd*dtYr
+    return raTarget,decTarget
 
 
 def precessHip(jd, ra,dec):
     """Compute precession in equatorial coordinates from the Hipparcos epoch (J2000) to the specified JD"""
     
-    tJC = dt.jd2tjc(jd)  # Time in Julian centuries since J2000.0
+    tJC  = dt.jd2tjc(jd)  # Time in Julian centuries since J2000.0
     tJC2 = tJC**2
     tJC3 = tJC*tJC2
     
@@ -62,7 +62,7 @@ def precessHip(jd, ra,dec):
     z     = (2306.2181*tJC + 1.09468*tJC2 + 0.018203*tJC3)*as2r
     theta = (2004.3109*tJC - 0.42665*tJC2 - 0.041833*tJC3)*as2r
     
-    raNew  = np.arctan2( np.sin(ra + zeta) * np.cos(dec),  np.cos(ra + zeta) * m.cos(theta) * np.cos(dec) - m.sin(theta) * np.sin(dec) ) + z
+    raNew  = (np.arctan2( np.sin(ra + zeta) * np.cos(dec),  np.cos(ra + zeta) * m.cos(theta) * np.cos(dec) - m.sin(theta) * np.sin(dec) ) + z) % pi2
     decNew = np.arcsin( np.cos(ra + zeta) * m.sin(theta) * np.cos(dec)  +  m.cos(theta) * np.sin(dec) )
     return raNew,decNew
 
@@ -99,8 +99,7 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0):
     u  = m.atan(ba*m.tan(obsLat))
     rs = ba*m.sin(u) + obsEle/re * m.sin(obsLat)
     rc = m.cos(u)    + obsEle/re * m.cos(obsLat)
-
-    gcDist = 389625.687911882531
+    
     sinHp = m.sin(earthRad/AU)/(gcDist/AU)  # Sine of the horizontal parallax, Meeus, Eq. 40.1
     
     # Meeus, Ch.40, p.282:
@@ -109,6 +108,8 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0):
     tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(rs*m.sin(eps) + rc*m.cos(eps)*m.sin(lst)) , n ) % pi2  # Topocentric longitude
     tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(rs*m.cos(eps) - rc*m.sin(eps)*m.sin(lst))))/n)         # Topocentric latitude
     tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/n)                                                   # Topocentric semi-diameter
+    
+    #print(gcDist*gcRad/tcRad)
     
     return tcLon,tcLat,tcRad
 
