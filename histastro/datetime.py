@@ -17,7 +17,7 @@ def julianDay(year,month,day):
     if year0 > 1582:     # Assume a Gregorian date
        a = m.floor(year/100.0)
        b = 2 - a + m.floor(a/4.0)
-    
+       
     jd = m.floor(365.25*(year+4716)) + m.floor(30.6001*(month+1)) + day + b - 1524.5
     return jd
 

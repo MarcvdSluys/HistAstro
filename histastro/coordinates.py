@@ -103,13 +103,13 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0):
     sinHp = m.sin(earthRad/AU)/(gcDist/AU)  # Sine of the horizontal parallax, Meeus, Eq. 40.1
     
     # Meeus, Ch.40, p.282:
-    n  = m.cos(gcLon)*m.cos(gcLat) - rc*sinHp*m.cos(lst)
+    N  = m.cos(gcLon)*m.cos(gcLat) - rc*sinHp*m.cos(lst)
     
-    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(rs*m.sin(eps) + rc*m.cos(eps)*m.sin(lst)) , n ) % pi2  # Topocentric longitude
-    tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(rs*m.cos(eps) - rc*m.sin(eps)*m.sin(lst))))/n)         # Topocentric latitude
-    tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/n)                                                   # Topocentric semi-diameter
+    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(rs*m.sin(eps) + rc*m.cos(eps)*m.sin(lst)) , N ) % pi2  # Topocentric longitude
+    tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(rs*m.cos(eps) - rc*m.sin(eps)*m.sin(lst))))/N)         # Topocentric latitude
+    tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/N)                                                   # Topocentric semi-diameter
     
-    #print(gcDist*gcRad/tcRad)
+    # print(gcDist, gcDist*gcRad/tcRad)
     
     return tcLon,tcLat,tcRad
 
