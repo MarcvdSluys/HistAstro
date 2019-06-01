@@ -67,7 +67,7 @@ def precessHip(jd, ra,dec):
     return raNew,decNew
 
 
-def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0):
+def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0, debug=False):
     """ Convert spherical ecliptical coordinates from the geocentric to the topocentric system
     
     Input parameters:
@@ -92,25 +92,43 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0):
     """
     
     # Meeus, Ch.11, p.82:
-    ba = 0.996647189335    # b/a = 1-f: flattening of the Earth - WGS84 ellipsoid 
-    re = earthRad*1000     # Equatorial radius of the Earth in metres (same units as the elevation)
-    #                      (http://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf)
+    Req = earthRad*1000      # Equatorial radius of the Earth in metres (same units as the elevation)
+    #                        (http://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf)
+    RpolEq = 0.996647189335  # Rpol/Req = 1-f: flattening of the Earth - WGS84 ellipsoid 
     
-    u  = m.atan(ba*m.tan(obsLat))
-    rs = ba*m.sin(u) + obsEle/re * m.sin(obsLat)
-    rc = m.cos(u)    + obsEle/re * m.cos(obsLat)
+    u  = m.atan(RpolEq*m.tan(obsLat))
+    RsinPhi = RpolEq*m.sin(u) + obsEle/Req * m.sin(obsLat)
+    RcosPhi = m.cos(u)        + obsEle/Req * m.cos(obsLat)
     
     sinHp = m.sin(earthRad/AU)/(gcDist/AU)  # Sine of the horizontal parallax, Meeus, Eq. 40.1
     
     # Meeus, Ch.40, p.282:
-    N  = m.cos(gcLon)*m.cos(gcLat) - rc*sinHp*m.cos(lst)
+    N  = m.cos(gcLon)*m.cos(gcLat) - RcosPhi*sinHp*m.cos(lst)
     
-    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(rs*m.sin(eps) + rc*m.cos(eps)*m.sin(lst)) , N ) % pi2  # Topocentric longitude
-    tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(rs*m.cos(eps) - rc*m.sin(eps)*m.sin(lst))))/N)         # Topocentric latitude
+    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(RsinPhi*m.sin(eps) + RcosPhi*m.cos(eps)*m.sin(lst)) , N ) % pi2  # Topocentric longitude
+    tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(RsinPhi*m.cos(eps) - RcosPhi*m.sin(eps)*m.sin(lst))))/N)         # Topocentric latitude
     tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/N)                                                   # Topocentric semi-diameter
     
     # print(gcDist, gcDist*gcRad/tcRad)
     
+    if debug:
+        print()
+        print('geoc2topoc_ecl():')
+        print('%10s  %25s  %25s' % ('', 'rad/km/...','deg'))
+        print()
+        print('%10s  %25.15f' % ('Req: ', Req) )
+        print('%10s  %25.15f' % ('RpolEq: ', RpolEq) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('u: ', u, u*r2d) )
+        print('%10s  %25.15f' % ('RsinPhi: ', RsinPhi) )
+        print('%10s  %25.15f' % ('RcosPhi: ', RcosPhi) )
+        print()
+        print('%10s  %25.15f' % ('sinHp: ', sinHp) )
+        print('%10s  %25.15f  %25.15f' % ('N: ', N, N*r2d) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('tcLon: ', tcLon, tcLon*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('tcLat: ', tcLat, tcLat*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('tcRad: ', tcRad, tcRad*r2d) )
     return tcLon,tcLat,tcRad
 
 

@@ -15,7 +15,7 @@ def readData(inFile):
     return lrTerms,bTerms
 
 
-def compute_lbr(jde, lrTerms,bTerms):
+def compute_lbr(jde, lrTerms,bTerms, debug=False):
     """Compute the geocentric ecliptic coordinates of the Moon for the equinox of date, from the JDE (and ELP82
     terms) provided.
     """
@@ -82,37 +82,41 @@ def compute_lbr(jde, lrTerms,bTerms):
     
     diam = 2*m.atan(moonRad/dist)
     
-    print()
-    print('%10s  %25.15f' % ('jde:  ', jde) )
-    print('%10s  %25.15f' % ('tjc:  ', tjc) )
-    print()
-    print('%10s  %25.15f  %25.15f' % ('lm:  ', lm, lm*r2d) )
-    print()
-    print('%10s  %25.15f  %25.15f' % ('d:   ', d, d*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('ms:  ', ms, ms*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('mm:  ', mm, mm*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('f:   ', f, f*r2d) )
-    print()
-    print('%10s  %25.15f' % ('e:   ', e) )
-    print()
-    print('%10s  %25.15f  %25.15f' % ('a1:  ', a1, a1*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('a2:  ', a2, a2*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('a3:  ', a3, a3*r2d) )
-    print()
-    print("ELP82 sums:")
-    print('%10s  %25.15f  %25.15f' % ('lon: ', lon1, lon1*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('lat: ', lat1, lat1*r2d) )
-    print('%10s  %25.15f' % ('dist:', dist1) )
-    print()
-    print('%10s  %25.15f  %25.15f' % ('dlon: ', dlon, dlon*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('dlat: ', dlat, dlat*r2d) )
-    print()
-    print('%10s  %25.15f  %25.15f' % ('lon:  ', lon, lon*r2d) )
-    print('%10s  %25.15f  %25.15f' % ('lat:  ', lat, lat*r2d) )
-    print('%10s  %25.15f' % ('dist:  ', dist) )
-    print('%10s  %25.15f  %25.15f' % ('diam:  ', diam, diam*r2d) )
-    print()
-    #    print('%10s  %25.15f  %25.15f' % ('x:  ', x*r2d) )
+    if debug:
+        print()
+        print('compute_lbr():')
+        print('%10s  %25s  %25s' % ('', 'rad/km/...','deg'))
+        print()
+        print('%10s  %25.15f' % ('jde:  ', jde) )
+        print('%10s  %25.15f' % ('tjc:  ', tjc) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('lm:  ', lm, lm*r2d) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('d:   ', d, d*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('ms:  ', ms, ms*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('mm:  ', mm, mm*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('f:   ', f, f*r2d) )
+        print()
+        print('%10s  %25.15f' % ('e:   ', e) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('a1:  ', a1, a1*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('a2:  ', a2, a2*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('a3:  ', a3, a3*r2d) )
+        print()
+        print("ELP82 sums:")
+        print('%10s  %25.15f  %25.15f' % ('lon: ', lon1, lon1*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('lat: ', lat1, lat1*r2d) )
+        print('%10s  %25.15f' % ('dist:', dist1) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('dlon: ', dlon, dlon*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('dlat: ', dlat, dlat*r2d) )
+        print()
+        print('%10s  %25.15f  %25.15f' % ('lon:  ', lon, lon*r2d) )
+        print('%10s  %25.15f  %25.15f' % ('lat:  ', lat, lat*r2d) )
+        print('%10s  %25.15f' % ('dist:  ', dist) )
+        print('%10s  %25.15f  %25.15f' % ('diam:  ', diam, diam*r2d) )
+        print()
+        #    print('%10s  %25.15f  %25.15f' % ('x:  ', x*r2d) )
     
     return lon,lat,dist,diam
 
