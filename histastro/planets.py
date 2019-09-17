@@ -6,11 +6,12 @@ import histastro.datetime as dt
 
 pi2 = m.pi*2
 
-def readVSOP(pl):
-    """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D file for planet pl (1-8)"""
+def readVSOP(dataDir, pl):
+    """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D.* file, located in the
+    directory specified by dataDir, for planet pl (1-8)"""
     
     exts = ['mer','ven','ear','mar','jup','sat','ura','nep']
-    fileName = 'data/VSOP87D.'+exts[pl-1]
+    fileName = dataDir+'/VSOP87D.'+exts[pl-1]
     inFile = open(fileName,'r')
     
     import fortranformat as ff

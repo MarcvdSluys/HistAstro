@@ -6,9 +6,8 @@ from histastro.constants import pi2,d2r,r2d,jd2000,moonRad
 
 
 def readData(inFile):
-    """Read the periodic terms for the ELP82B theory, selected by Meeus and return them in two arrays: one for
-    longitude and distance, and one for latitude.
-    """
+    """Read the periodic terms for the ELP82B theory, as selected by Meeus, from moonposMeeus.csv and return them
+    in two arrays: one for longitude and distance, and one for latitude."""
     
     lrTerms = np.genfromtxt(inFile, delimiter=',', skip_header=1,  max_rows=60)  # Longitude and radius (6 columns: 4 args, 2 coefs)
     bTerms  = np.genfromtxt(inFile, delimiter=',', skip_header=61, max_rows=60)  # Latitude (5 columns: 4 args, 1 coef)
