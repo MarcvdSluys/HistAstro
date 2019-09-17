@@ -13,6 +13,7 @@ h2r   = d2r*15        # Hours to radians
 as2r  = d2r/3.6e3     # Arcseconds to radians
 mas2r = as2r/1000.0   # Milliarcseconds to radians
 
+jd1820 = 2385801      # JD in 1820  (for Delta-T fit)
 jd1900 = 2415021      # JD in 1900
 jd2000 = 2451545      # JD in 2000.0
 
