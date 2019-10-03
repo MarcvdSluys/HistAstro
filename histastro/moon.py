@@ -1,4 +1,5 @@
-#!/bin/env python3
+"""HistAstro Moon functions"""
+
 
 import math as m
 import numpy as np
