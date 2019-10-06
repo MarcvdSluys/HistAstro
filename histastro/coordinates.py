@@ -9,7 +9,15 @@ import histastro.datetime as dt
 
 
 def obliquity(jd):
-    """Compute the obliquity of the ecliptic in radians from the JD(E)  (Seidelman 1992, Eq. 3.222-1)"""
+    """Compute the obliquity of the ecliptic in radians from the JD(E)  (Seidelman 1992, Eq. 3.222-1)
+
+    Args:
+      jd: Julian day (days)
+
+    Returns:
+      eps: Obliquity of the ecliptic (rad)
+
+    """
     
     tJC = dt.jd2tjc(jd)  # Time in Julian centuries since J2000.0
     eps = 0.409092804 - 2.269655e-4*tJC - 2.86e-9*tJC**2 + 8.78967e-9*tJC**3  # Obliquity of the ecliptic (rad)
@@ -17,7 +25,17 @@ def obliquity(jd):
 
 
 def eq2ecl(ra,dec, eps):
-    """Convert equatorial coordinates to ecliptical"""
+    """Convert equatorial coordinates to ecliptical
+
+    Args:
+      ra: Right ascension (rad)
+      dec: Declination (rad)
+      eps: Obliquity of the ecliptic (rad)
+
+    Returns:
+      lon: ecliptical longitude (rad)
+      lat: ecliptical latitude (rad)
+    """
     
     lon = np.arctan2( np.sin(ra)  * m.cos(eps) + np.tan(dec) * m.sin(eps),  np.cos(ra) ) % pi2
     lat =  np.arcsin( np.sin(dec) * m.cos(eps) - np.cos(dec) * m.sin(eps) * np.sin(ra) )
@@ -26,7 +44,17 @@ def eq2ecl(ra,dec, eps):
 
 def ecl2eq(lon,lat, eps):
     """Convert (geocentric) spherical ecliptical coordinates lon, lat (and eps) to spherical equatorial coordinates RA, Dec.
-    See Expl. Supl. t.t. Astronimical Almanac 3rd Ed, Eq.14.43"""
+    See Expl. Supl. t.t. Astronimical Almanac 3rd Ed, Eq.14.43
+
+    Args:
+      lon: ecliptical longitude (rad)
+      lat: ecliptical latitude (rad)
+      eps: Obliquity of the ecliptic (rad)
+    
+    Returns:
+      ra: Right ascension (rad)
+      dec: Declination (rad)
+    """
     
     ra  = np.arctan2( np.sin(lon) * np.cos(eps)  -  np.tan(lat) * np.sin(eps),  np.cos(lon) ) % pi2
     dec =  np.arcsin( np.sin(lat) * np.cos(eps)  +  np.cos(lat) * np.sin(eps) * np.sin(lon) )
@@ -34,25 +62,63 @@ def ecl2eq(lon,lat, eps):
 
 
 def par2horiz(ha,dec, phi):
-    """Convert parallactic coordinates to horizontal"""
+    """Convert parallactic coordinates to horizontal
+
+    Args:
+      ha:  Hour angle (rad)
+      dec: Declination (rad)
+      phi: Geographical latitude (rad, N>0)
+
+    Returns:
+      az: azimuth (rad, S=0)
+      alt: altitude (rad)
+
+    """
     
     az  = np.arctan2( np.sin(ha),   np.cos(ha) * m.sin(phi) - np.tan(dec) * m.cos(phi) ) % pi2
     alt = np.arcsin(  np.sin(dec) * m.sin(phi) + np.cos(ha) * np.cos(dec) * m.cos(phi) )
+    
     return az,alt
 
 
 def properMotion(startJD,targetJD, ra,dec, pma,pmd):
     """Compute the proper motion from startJD to targetJD for the positions given in (numpy arrays) ra and dec
-    (in rad) and proper motions in pma,pmd (in rad/yr)"""
+    (in rad) and proper motions in pma,pmd (in rad/yr)
+
+    Args:
+      startJD:   Julian day of the initial epoch (days)
+      targetJD:  Julian day of the target epoch (days)
+      ra:        Right ascension (rad)
+      dec:       Declination (rad)
+      pma:       Proper motion in right ascension (rad/yr)
+      pmd:       Proper motion in declination (rad/yr)
+
+    Returns:
+      raTarget:   Right ascension for the target epoch (rad)
+      decTarget:  Declination for the target epoch (rad)
+
+    """
     
     dtYr   = (targetJD - startJD)/365.25
     raTarget  = ra  + pma*dtYr / np.cos(dec)
     decTarget = dec + pmd*dtYr
+    
     return raTarget,decTarget
 
 
 def precessHip(jd, ra,dec):
-    """Compute precession in equatorial coordinates from the Hipparcos epoch (J2000) to the specified JD"""
+    """Compute precession in equatorial coordinates from the Hipparcos equinox (J2000) to that of the specified JD
+    
+    Args:
+      jd:   Julian day (days)
+      ra:   Right ascension (rad)
+      dec:  Declination (rad)
+    
+    Returns:
+      raNew:   Right ascension for the target equinox (rad)
+      decNew:  Declination for the target equinox (rad)
+    
+    """
     
     tJC  = dt.jd2tjc(jd)  # Time in Julian centuries since J2000.0
     tJC2 = tJC**2
@@ -64,31 +130,31 @@ def precessHip(jd, ra,dec):
     
     raNew  = (np.arctan2( np.sin(ra + zeta) * np.cos(dec),  np.cos(ra + zeta) * m.cos(theta) * np.cos(dec) - m.sin(theta) * np.sin(dec) ) + z) % pi2
     decNew = np.arcsin( np.cos(ra + zeta) * m.sin(theta) * np.cos(dec)  +  m.cos(theta) * np.sin(dec) )
+    
     return raNew,decNew
 
 
 def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0, debug=False):
-    """ Convert spherical ecliptical coordinates from the geocentric to the topocentric system
+    """Convert spherical ecliptical coordinates from the geocentric to the topocentric system
     
-    Input parameters:
-    - gcLon   Geocentric ecliptic longitude (rad)
-    - gcLat   Geocentric ecliptic latitude (rad)
-    - gcDist  Geocentric distance
-    - gcRad   Geocentric semi-diameter (rad)
-    
-    - eps   Obliquity of the ecliptic (rad)
-    - lst   Local sidereal time (rad)
-    
-    - obsLat   Latitude of the observer (rad)
-    - obsEle   Altitude/elevation of the observer above sea level (metres, optional)
-    
-    Return values:
-    - tcLon   Topocentric ecliptic longitude (rad)
-    - tcLat   Topocentric ecliptic latitude (rad)
-    - tcRad   Topocentric semi-diameter (rad)
-    
-    See:
-    - Meeus, Astronomical Algorithms, 1998, Ch. 11 and 40
+    Args:
+      gcLon:   Geocentric ecliptic longitude (rad)
+      gcLat:   Geocentric ecliptic latitude (rad)
+      gcDist:  Geocentric distance (AU)
+      gcRad:   Geocentric semi-diameter (rad)
+      
+      eps:     Obliquity of the ecliptic (rad)
+      lst:     Local sidereal time (rad)
+      
+      obsLat:  Geographical latitude of the observer (rad)
+      obsEle:  Altitude/elevation of the observer above sea level (metres, optional, default value = 0)
+      
+      debug:   Print debug output (True/False, optional, default value = True)
+
+    Returns:
+      tcLon:  Topocentric ecliptic longitude (rad)
+      tcLat:  Topocentric ecliptic latitude (rad)
+      tcRad:  Topocentric semi-diameter (rad)
     """
     
     # Meeus, Ch.11, p.82:
@@ -107,7 +173,7 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0, debug=Fa
     
     tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(RsinPhi*m.sin(eps) + RcosPhi*m.cos(eps)*m.sin(lst)) , N ) % pi2  # Topocentric longitude
     tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(RsinPhi*m.cos(eps) - RcosPhi*m.sin(eps)*m.sin(lst))))/N)         # Topocentric latitude
-    tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/N)                                                             # Topocentric semi-diameter
+    tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/N)                                                   # Topocentric semi-diameter
     
     # print(gcDist, gcDist*gcRad/tcRad)
     
@@ -129,6 +195,7 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0, debug=Fa
         print('%10s  %25.15f  %25.15f' % ('tcLon: ', tcLon, tcLon*r2d) )
         print('%10s  %25.15f  %25.15f' % ('tcLat: ', tcLat, tcLat*r2d) )
         print('%10s  %25.15f  %25.15f' % ('tcRad: ', tcRad, tcRad*r2d) )
+        
     return tcLon,tcLat,tcRad
 
 

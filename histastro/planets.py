@@ -8,7 +8,15 @@ pi2 = m.pi*2
 
 def readVSOP(dataDir, pl):
     """Read the periodic terms for a heliocentric ecliptical planet position from a VSOP87D.* file, located in the
-    directory specified by dataDir, for planet pl (1-8)"""
+    directory specified by dataDir, for planet pl (1-8)
+
+    Args:
+      dataDir: 
+      pl: 
+
+    Returns:
+
+    """
     
     exts = ['mer','ven','ear','mar','jup','sat','ura','nep']
     fileName = dataDir+'/VSOP87D.'+exts[pl-1]
@@ -40,6 +48,17 @@ def readVSOP(dataDir, pl):
 
 # Compute heliocentric ecliptical coordinates from periodic terms
 def computeLBR(jde, lonTerms,latTerms,radTerms):
+    """
+
+    Args:
+      jde: 
+      lonTerms: 
+      latTerms: 
+      radTerms: 
+
+    Returns:
+
+    """
     Tjm = dt.jd2tjm(jde)  # Time since 2000 in Julian millennia
     
     lon=0.0; lat=0.0; rad=0.0
@@ -59,6 +78,19 @@ def computeLBR(jde, lonTerms,latTerms,radTerms):
 # Convert from heliocentric spherical to rectangular coordinates, and take the difference (i.e., geocentric
 # rectangular coordinates):
 def hc2gc(l0,b0,r0, l,b,r):
+    """
+
+    Args:
+      l0: 
+      b0: 
+      r0: 
+      l: 
+      b: 
+      r: 
+
+    Returns:
+
+    """
     x = r * m.cos(b) * m.cos(l)  -  r0 * m.cos(b0) * m.cos(l0)
     y = r * m.cos(b) * m.sin(l)  -  r0 * m.cos(b0) * m.sin(l0)
     z = r * m.sin(b)             -  r0 * m.sin(b0)
@@ -81,6 +113,19 @@ def hc2gc(l0,b0,r0, l,b,r):
 
 # Convert from heliocentric rectangular coordinates to geocentric spherical coordinates):
 def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
+    """
+
+    Args:
+      x0: 
+      y0: 
+      z0: 
+      x: 
+      y: 
+      z: 
+
+    Returns:
+
+    """
     dx = x - x0
     dy = y - y0
     dz = z - z0
@@ -102,7 +147,17 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
 
 
 def plMagn(pl, distPS, distPE, distSE):
-    """Compute the magnitude of planet pl (1-2, 4-9)  -  Expl.Suppl.tt.Astr.Almanac 3rd Ed, Table 10.6, p.413 + errata!"""
+    """Compute the magnitude of planet pl (1-2, 4-9)  -  Expl.Suppl.tt.Astr.Almanac 3rd Ed, Table 10.6, p.413 + errata!
+
+    Args:
+      pl: 
+      distPS: 
+      distPE: 
+      distSE: 
+
+    Returns:
+
+    """
 
     #               Mer    Ven1   Ven2   Mars   Jup    Sat    Ur     Nep    Pl
     a0 = np.array([-0.60, -4.47,  0.98, -1.52, -9.40, -8.88, -7.19, -6.87, -1.01])
@@ -120,7 +175,16 @@ def plMagn(pl, distPS, distPE, distSE):
     
 
 def satRingMagn(JD, lon,lat):
-    """Compute the magnitude of Saturn's rings from the JD and Saturns geocentric, ecliptical coordinates (in rad)"""
+    """Compute the magnitude of Saturn's rings from the JD and Saturns geocentric, ecliptical coordinates (in rad)
+
+    Args:
+      JD: 
+      lon: 
+      lat: 
+
+    Returns:
+
+    """
     tJC = dt.jd2tjc(JD)  # Time since 2000 in Julian centuries
     
     incl = 0.49                # Inclination of Saturn's rotation axis (rad)
