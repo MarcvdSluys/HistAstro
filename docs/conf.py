@@ -48,11 +48,11 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
+#    'recommonmark'
 ]
 
-napoleon_google_docstring = False
+napoleon_google_docstring = True
 napoleon_use_param = False
-napoleon_use_ivar = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -62,6 +62,7 @@ templates_path = ['.templates']
 #
 # source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
+
 
 # The master toctree document.
 master_doc = 'index'

@@ -10,7 +10,6 @@ Welcome to histastro's documentation!
    :maxdepth: 4
    :caption: Contents:
 
-   readme
    histastro
 
 
