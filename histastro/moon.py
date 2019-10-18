@@ -27,9 +27,9 @@ def compute_lbr(jde, lrTerms,bTerms, debug=False):
     terms) provided.
 
     Args:
-      jde: 
+      jde:
       lrTerms: 
-      bTerms: 
+      bTerms:
       debug:  (Default value = False)
 
     Returns:

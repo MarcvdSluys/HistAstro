@@ -5,7 +5,7 @@ def mag2size(Mlim, mag, scale=1):
 
     Args:
       Mlim: 
-      mag: 
+      mag:
       scale:  (Default value = 1)
 
     Returns:

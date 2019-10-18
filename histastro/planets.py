@@ -11,7 +11,7 @@ def readVSOP(dataDir, pl):
     directory specified by dataDir, for planet pl (1-8)
 
     Args:
-      dataDir: 
+      dataDir:
       pl: 
 
     Returns:
@@ -51,9 +51,9 @@ def computeLBR(jde, lonTerms,latTerms,radTerms):
     """
 
     Args:
-      jde: 
-      lonTerms: 
-      latTerms: 
+      jde:
+      lonTerms:
+      latTerms:
       radTerms: 
 
     Returns:
@@ -81,11 +81,11 @@ def hc2gc(l0,b0,r0, l,b,r):
     """
 
     Args:
-      l0: 
-      b0: 
-      r0: 
-      l: 
-      b: 
+      l0:
+      b0:
+      r0:
+      l:
+      b:
       r: 
 
     Returns:
@@ -116,11 +116,11 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
     """
 
     Args:
-      x0: 
-      y0: 
-      z0: 
-      x: 
-      y: 
+      x0:
+      y0:
+      z0:
+      x:
+      y:
       z: 
 
     Returns:
@@ -150,10 +150,10 @@ def plMagn(pl, distPS, distPE, distSE):
     """Compute the magnitude of planet pl (1-2, 4-9)  -  Expl.Suppl.tt.Astr.Almanac 3rd Ed, Table 10.6, p.413 + errata!
 
     Args:
-      pl: 
-      distPS: 
-      distPE: 
-      distSE: 
+      pl:
+      distPS:
+      distPE:
+      distSE:
 
     Returns:
 
@@ -179,9 +179,9 @@ def satRingMagn(JD, lon,lat):
 
     Args:
       JD: 
-      lon: 
+      lon:
       lat: 
-
+    
     Returns:
 
     """
