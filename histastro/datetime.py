@@ -1,4 +1,4 @@
-"""HistAstro date and time functions"""
+"""Date and time functions for HistAstro."""
 
 
 # Modules:
@@ -8,16 +8,21 @@ from histastro.constants import pi2, jd1820,jd2000
 
 
 def julianDay(year,month,day):
-    """Compute the Julian Day for a given year, month and (decimal) day UT
+    """Compute the Julian Day for a given year, month and day.
+    
+    Notes:
+      - Date and time are expressed in UT.
+      - Decimals can be used in the day to take into account the time of day other than midnight, e.g. 1.5 for
+        noon on the first day of the month.
     
     Args:
-      year:  year CE.  Note: year=0 = 1 BCE
-      month: month number of year (1-12)
-      day:   day of month (1-31)
+      year (int):    Year CE (UT).  Note that year=0 = 1 BCE.
+      month (int):   Month number of year (UT; 1-12).
+      day (double):  Day of month with fraction (UT; 1.0-31.999).
     
     Returns:
-      jd:    Julian day (days)
-    
+      double:  jd: Julian day (days).
+
     """
     
     year0 = year
@@ -37,16 +42,24 @@ def julianDay(year,month,day):
 
 
 def jd2cal(jd):
-    """Compute the calendar date (year, month, day - UT) from a given Julian Day, using fractional days for time
+    """
+    Compute the calendar date from a given Julian Day.
+    
+    Notes:
+      - Date and time are expressed in UT.
+      - Decimals can be returned in the day to indicate the time of day, e.g. 1.0 for midnight and 1.5 for
+        noon on the first day of the month.
     
     Args:
-      jd:    Julian day (days)
+      jd (double):  Julian day (days).
     
     Returns:
-      year:  year CE.  Note: year=0 = 1 BCE
-      month: month number of year (1-12)
-      day:   day of month (1-31)
+      tuple (int,int,double):  Tuple containing (year, month, day):
     
+        - year (int):    Year CE (UT).  Note that year=0 indicates 1 BCE.
+        - month (int):   Month number of year (UT; 1-12).
+        - day (double):  Day of month with fraction (UT; 1.0-31.999).
+
     """
     
     z = m.floor(jd+0.5)
@@ -78,14 +91,15 @@ def jd2cal(jd):
 
 
 def jd2year(jd):
-    """Compute a year with fraction from a given Julian Day
-
+    """
+    Compute a year with fraction from a given Julian Day.
+    
     Args:
-      jd:    Julian day (days)
-
+      jd (double):  Julian day (days).
+    
     Returns:
-      year:  year CE, with decimals.  Note: year=0 = 1 BCE
-
+      double:  Year CE, with decimals.  Note that year=0 indicates 1 BCE.
+    
     """
     
     year,month,day = jd2cal(jd)     # Compute current year
@@ -98,27 +112,29 @@ def jd2year(jd):
 
 
 def jd2tjc(jd):
-    """Compute the time in Julian centuries since 2000.0
-
+    """
+    Compute the time in Julian centuries since 2000.0.
+    
     Args:
-      jd:   Julian day (days)
-
+      jd (double):  Julian day (days).
+    
     Returns:
-      tjc:  time in Julian centuries since 2000.0
-
+      double:  tjc: Time in Julian centuries since 2000.0 (UT).
+    
     """
     
     return (jd - 2451545.0)/36525
 
 
 def jd2tjm(jd):
-    """Compute the time in Julian millennia since 2000.0
-
+    """
+    Compute the time in Julian millennia since 2000.0.
+    
     Args:
-      jd:   Julian day (days)
-
+      jd (double):  Julian day (days).
+    
     Returns:
-      tjc:  time in Julian millennia since 2000.0
+      double:  tjm: Time in Julian millennia since 2000.0 (UT).
     
     """
     
@@ -126,14 +142,17 @@ def jd2tjm(jd):
 
 
 def gmst(jd):
-    """Calculate Greenwich Mean Sidereal Time for any instant, in radians.
-    Explanatory Supplement to the Astronomical Almanac, 3rd ed, Eq. 6.66 (2012)
+    """
+    Calculate Greenwich Mean Sidereal Time for any instant, in radians.
     
     Args:
-      jd:   Julian day (days)
-
+      jd (double):  Julian day (days).
+    
     Returns:
-      gmst: Greenwich mean sidereal time (rad)
+      double:  gmst: Greenwich mean sidereal time (rad).
+    
+    References:
+      - Explanatory Supplement to the Astronomical Almanac, 3rd ed, Eq. 6.66 (2012).
     
     """
     
@@ -148,15 +167,18 @@ def gmst(jd):
 
 
 def DeltaT1820(jd):
-    """Return a rough estimation for the value of DeltaT (s), assuming a lenghtening of the day of 1.8 ms/century
-    and that the minimum of the parabola is DeltaT=12s in 1820.
+    """
+    Return a rough estimate for the value of Delta T.
+    
+    A lenghtening of the day of 1.8 ms/century is assumed, as well as and that the minimum of the parabola is
+    DeltaT=12s in 1820.
     
     Args:
-      jd:   Julian day (days)
+      jd (double):  Julian day (days).
     
     Returns:
-      DeltaT:  Delta T (s)
-
+      double:  Delta T (s).
+    
     """
     
     # return 12 + 0.5 * 1.8e-3/86400/(36525*86400) * ((jd-jd1820)*86400)**2
@@ -165,16 +187,18 @@ def DeltaT1820(jd):
 
 
 def DeltaT(jd):
-    """Return a rough estimation for the value of DeltaT (s), using a lenghtening of the day of 1.8 ms/century and
-      that the minimum of the parabola is DeltaT=12s in 1820.  For the date range -700 - now, an interpolation
-      of known historical values is used.
+    """Return the value of DeltaT through interpolation.
+    
+    For the date range -700 - now, the value for Delta T is obtained by interpolation of known historical
+      values.  Outside this range, a lenghtening of the day of 1.8 ms/century is assumed, as well as that the
+      minimum of the parabola is DeltaT=12s in 1820.
     
     Args:
-      jd:   Julian day (days)
-
+      jd (double):  Julian day (days).
+    
     Returns:
-      DeltaT:  Delta T (s)
-
+      double:  Delta T (s).
+    
     """
     
     # Known data:

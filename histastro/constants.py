@@ -1,4 +1,4 @@
-"""HistAstro constants"""
+"""Definition of constants for HistAstro."""
 
 # Modules:
 import math as m

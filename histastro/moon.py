@@ -1,4 +1,4 @@
-"""HistAstro Moon functions"""
+"""Moon functions for HistAstro."""
 
 
 import math as m
@@ -6,34 +6,75 @@ import numpy as np
 from histastro.constants import pi2,d2r,r2d,jd2000,moonRad
 
 
-def readData(inFile):
-    """Read the periodic terms for the ELP82B theory, as selected by Meeus, from moonposMeeus.csv and return them
-    in two arrays: one for longitude and distance, and one for latitude.
+def readData(inFile='data/moonposMeeus.csv'):
+    """
+    Return the periodic terms for the ELP82B theory from moonposMeeus.csv.
 
-    Args:
-      inFile: 
+      - Two arrays aand return them in two arrays: one for longitude and distance, and one for latitude.
+
+    Args: 
+      inFile (str): Name of the input file, including (relative or absolute) path.  Optional, default
+      value = 'data/moonposMeeus.csv'.
 
     Returns:
+      tuple (double,double):  Tuple containing (lrTerms, bTerms):
+
+        - lrTerms (double): Numpy array containing six columns with periodic terms for longitude and distance.
+          The first four columns contain arguments for both variables, the last two the coefficients for
+          longitude and distance:
+    
+          - 1 (int): Multiplication factor for the mean elongation of the Moon.
+          - 2 (int): Multiplication factor for the mean anomaly of the Sun.
+          - 3 (int): Multiplication factor for the mean anomaly of the Moon.
+          - 4 (int): Multiplication factor for the Moon's argument of latitude.
+          - 5 Coefficient of the sine of the argument, for the longitude (rad).
+          - 6 Coefficient of the cosine of the argument, for the distance (km).
+    
+        - bTerms (double): Numpy array containing five columns periodic terms for latitude.  The first four
+          columns contain arguments, the last contains the coefficients for latitude:
+    
+          - 1 (int): Multiplication factor for the mean elongation of the Moon.
+          - 2 (int): Multiplication factor for the mean anomaly of the Sun.
+          - 3 (int): Multiplication factor for the mean anomaly of the Moon.
+          - 4 (int): Multiplication factor for the Moon's argument of latitude.
+          - 5 Coefficient of the sine of the argument, for the latitude (rad).
+    
+    References:
+      - [Jean Meeus: Astronomical Algorithms, 2nd Ed. (1998)](https://www.willbell.com/math/MC1.HTM), Ch.47.
 
     """
     
     lrTerms = np.genfromtxt(inFile, delimiter=',', skip_header=1,  max_rows=60)  # Longitude and radius (6 columns: 4 args, 2 coefs)
     bTerms  = np.genfromtxt(inFile, delimiter=',', skip_header=61, max_rows=60)  # Latitude (5 columns: 4 args, 1 coef)
+    
     return lrTerms,bTerms
 
 
 def compute_lbr(jde, lrTerms,bTerms, debug=False):
-    """Compute the geocentric ecliptic coordinates of the Moon for the equinox of date, from the JDE (and ELP82
-    terms) provided.
-
+    """
+    Compute the geocentric ecliptic coordinates of the Moon for the equinox of date for the given JDE.
+    
     Args:
-      jde:
-      lrTerms: 
-      bTerms:
-      debug:  (Default value = False)
-
+      jde (double):      Julian Day in dynamical time, i.e., corrected for Delta T (days).
+      lrTerms (double):  Numpy array with ELP82 periodic terms for longitude and distance.
+      bTerms (double):   Numpy array with ELP82 periodic terms for latitude.
+      debug (bool):      Produce debug output.  Optional, default value = False.
+    
     Returns:
-
+      tuple (double,double,double,double):  Tuple containing (lon, lat, dist, diam):
+    
+        - lon (double):   Geocentric ecliptic longitude of the Moon (rad).
+        - lat (double):   Geocentric ecliptic longitude of the Moon (rad).
+        - dist (double):  Geocentric distance of the Moon (km).
+        - diam (double):  Geocentric apparent diameter of the Moon (rad).
+    
+    Notes:
+      - A reduced version of the ELP82 theory is used.
+      - The necessary ELP82 terms can be read from file using the function readData().
+    
+    References:
+      - [Chapront-Touze & Chapront, A&A 190, 342 (1988)](https://ui.adsabs.harvard.edu/abs/1988A%26A...190..342C).
+    
     """
     
     tjc   = (jde-jd2000)/36525  # Julian Centuries after 2000.0 in dynamical time
@@ -53,7 +94,7 @@ def compute_lbr(jde, lrTerms,bTerms, debug=False):
     
     e  = 1 - 0.002516*tjc - 0.0000074*tjc2
     
-    # Compute ELP terms:
+    # Compute ELP82 terms:
     lon=0; lat=0; dist=0
     for iLine in range(60):  # Data lines
         argl = 0
