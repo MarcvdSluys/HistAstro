@@ -179,6 +179,9 @@ def DeltaT1820(jd):
     Returns:
       double:  Delta T (s).
     
+    References:
+      - [Extrapolation of Delta T](http://hemel.waarnemen.com/Computing/deltat.html).
+    
     """
     
     # return 12 + 0.5 * 1.8e-3/86400/(36525*86400) * ((jd-jd1820)*86400)**2
@@ -198,6 +201,11 @@ def DeltaT(jd):
     
     Returns:
       double:  Delta T (s).
+    
+    References:
+      - [International Earth Rotation and Reference Systems Service](ftp://maia.usno.navy.mil/ser7/deltat.data) of the U.S. Naval Observatory.
+      - [Robert van Gent's website on Delta T](https://www.staff.science.uu.nl/~gent0113/deltat/deltat.htm).
+      - [Extrapolation of Delta T](http://hemel.waarnemen.com/Computing/deltat.html).
     
     """
     

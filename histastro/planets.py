@@ -23,6 +23,10 @@ def readVSOP(dataDir, pl):
       - latTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical latitude.
       - radTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric distance.
     
+    References:
+      - [Bretagnon & Francou, A&A 202, 309 (1988)](https://ui.adsabs.harvard.edu/abs/1988A%26A...202..309B).
+      - [VSOP87D.* data files](http://cdsarc.u-strasbg.fr/viz-bin/Cat?cat=VI/81): click on FTP, download VSOP87D.*.
+    
     """
     
     exts = ['mer','ven','ear','mar','jup','sat','ura','nep']
@@ -70,6 +74,9 @@ def computeLBR(jde, lonTerms,latTerms,radTerms):
         - lon (double):  Heliocentric ecliptical longitude (rad).
         - lat (double):  Heliocentric ecliptical latitude (rad).
         - rad (double):  Heliocentric distance (km).
+    
+    References:
+      - [Bretagnon & Francou, A&A 202, 309 (1988)](https://ui.adsabs.harvard.edu/abs/1988A%26A...202..309B).
     
     """
     
@@ -194,7 +201,7 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
 
 
 
-def plMagn(pl, distPS, distPE, distSE):
+def magnPlanet(pl, distPS, distPE, distSE):
     """Compute the apparent visual magnitude of a planet.
     
     Args:
@@ -229,7 +236,7 @@ def plMagn(pl, distPS, distPE, distSE):
     
 
 
-def satRingMagn(JD, lon,lat):
+def magnSatRing(JD, lon,lat):
     """Compute the apparent visual magnitude of Saturn's rings.
     
     Args:
@@ -238,7 +245,7 @@ def satRingMagn(JD, lon,lat):
       lat (double):  Geocentric ecliptical latitude of Saturn (rad).
     
     Returns:
-      double:  satRingMagn: Apparent visual magnitude of the planet.
+      double:  magnSatRing: Apparent visual magnitude of the planet.
     
     References:
       - [Explanatory Supplement to the Astronomical Almanac 3rd Ed, Table 10.6, p.413 +
@@ -257,7 +264,7 @@ def satRingMagn(JD, lon,lat):
     ascNod = 2.96 + 0.024*tJC  # Ascending node of Saturn's orbit (rad)
     
     sinB = np.sin(incl) * np.cos(lat) * np.sin(lon-ascNod)  -  np.cos(incl) * np.sin(lat)
-    satRingMagn = -2.60*abs(sinB) + 1.25*(sinB)**2
+    magnSatRing = -2.60*abs(sinB) + 1.25*(sinB)**2
     
-    return satRingMagn
+    return magnSatRing
     
