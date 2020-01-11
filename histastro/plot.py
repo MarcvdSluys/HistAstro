@@ -15,6 +15,7 @@
 
 """Plot-related functions for HistAstro."""
 
+
 def mag2size(Mlim, mag, scale=1):
     """
     Convert magnitudes (mag) to disc area ('size') for plotting with pyplot.scatter(), given a magnitude limit Mlim.

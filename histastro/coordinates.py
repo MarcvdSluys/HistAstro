@@ -19,7 +19,7 @@
 # Modules:
 import math as m
 import numpy.core as np
-from histastro.constants import pi,pi2, r2d,as2r, earthRad,AU
+from histastro.constants import pi2, r2d,as2r, earthRad,AU
 import histastro.datetime as dt
 
 
@@ -214,7 +214,7 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0, debug=Fa
     # Meeus, Ch.40, p.282:
     N  = m.cos(gcLon)*m.cos(gcLat) - RcosPhi*sinHp*m.cos(lst)
     
-    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(RsinPhi*m.sin(eps) + RcosPhi*m.cos(eps)*m.sin(lst)) , N ) % pi2  # Topocentric longitude
+    tcLon = m.atan2( m.sin(gcLon)*m.cos(gcLat) - sinHp*(RsinPhi*m.sin(eps) + RcosPhi*m.cos(eps)*m.sin(lst)), N ) % pi2  # Topocentric longitude
     tcLat = m.atan((m.cos(tcLon)*(m.sin(gcLat) - sinHp*(RsinPhi*m.cos(eps) - RcosPhi*m.sin(eps)*m.sin(lst))))/N)         # Topocentric latitude
     tcRad = m.asin(m.cos(tcLon)*m.cos(tcLat)*m.sin(gcRad)/N)                                                   # Topocentric semi-diameter
     

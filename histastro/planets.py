@@ -57,13 +57,13 @@ def readVSOP(dataDir, pl):
     for iBlock in range(3*6):  # 3 variables (l,b,r), up to 6 powers (0-5)
         line = inFile.readline()
         var,power,nTerm = formatHeader.read(line)
-        #print(var,power,nTerm)
+        # print(var,power,nTerm)
         if line == '': break  # EoF
         
         for iLine in range(nTerm):
             line = inFile.readline()
             a,b,c = formatBody.read(line)
-            #print(iLine, var,power, a,b,c)
+            # print(iLine, var,power, a,b,c)
             
             if var == 1: lonTerms.append([power, a,b,c])  # var=1: ecliptic longitude
             if var == 2: latTerms.append([power, a,b,c])  # var=2: ecliptic latitude
@@ -111,7 +111,7 @@ def computeLBR(jde, lonTerms,latTerms,radTerms):
         cosTerm = terms[1] * m.cos(terms[2] + terms[3]*Tjm)
         rad += cosTerm * Tjm**terms[0]
         
-    return lon%pi2, lat, rad
+    return lon % pi2, lat, rad
 
 
 

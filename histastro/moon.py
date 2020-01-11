@@ -18,7 +18,7 @@
 
 import math as m
 import numpy as np
-from histastro.constants import pi2,d2r,r2d,jd2000,moonRad
+from histastro.constants import pi2,r2d,jd2000,moonRad  # ,d2r
 
 
 def readData(inFile='data/moonposMeeus.csv'):
@@ -135,16 +135,16 @@ def compute_lbr(jde, lrTerms,bTerms, debug=False):
     a3 = (5.4707345 + 8399.6847253 * tjc) % pi2
     
     # Meeus, p.342:
-    #dlon = (3958*m.sin(a1) + 1962*m.sin(lm-f) + 318*m.sin(a2)) * d2r * 1e-6
-    #dlat = (-2235*m.sin(lm) + 382*m.sin(a3) + 175*m.sin(a1-f) + 175*m.sin(a1+f) + 127*m.sin(lm-mm) - 115*m.sin(lm+mm)) * d2r * 1e-6
+    # dlon = (3958*m.sin(a1) + 1962*m.sin(lm-f) + 318*m.sin(a2)) * d2r * 1e-6
+    # dlat = (-2235*m.sin(lm) + 382*m.sin(a3) + 175*m.sin(a1-f) + 175*m.sin(a1+f) + 127*m.sin(lm-mm) - 115*m.sin(lm+mm)) * d2r * 1e-6
     dlon =  6.908e-5*m.sin(a1) + 3.4243e-5*m.sin(lm-f) + 5.55e-6*m.sin(a2)
     dlat = -3.9008e-5*m.sin(lm) + 6.667e-6*m.sin(a3) + 3.0543e-6*m.sin(a1-f) + 3.0543e-6*m.sin(a1+f) + 2.2166e-6*m.sin(lm-mm) - 2.007e-6*m.sin(lm+mm)
     
     
     # Compute nutation in longitude:
-    #omg  = 2.18243858558 - 33.7570459367*tjc + 3.6142278e-5*tjc2 + 3.87850944888e-8*tjc3   # Moon's mean lon. of asc.node, Meeus p.144
-    #ls   = 4.89506386655 + 62.84528862*tjc                                                 # Mean long. Sun, Meeus p.144
-    #dpsi = -8.338795e-5*m.sin(omg) - 6.39954e-6*m.sin(2*ls) - 1.115e-6*m.sin(2*lm) + 1.018e-6*m.sin(2*omg)
+    # omg  = 2.18243858558 - 33.7570459367*tjc + 3.6142278e-5*tjc2 + 3.87850944888e-8*tjc3   # Moon's mean lon. of asc.node, Meeus p.144
+    # ls   = 4.89506386655 + 62.84528862*tjc                                                 # Mean long. Sun, Meeus p.144
+    # dpsi = -8.338795e-5*m.sin(omg) - 6.39954e-6*m.sin(2*ls) - 1.115e-6*m.sin(2*lm) + 1.018e-6*m.sin(2*omg)
     dpsi = 0
     
     # Add mean values:

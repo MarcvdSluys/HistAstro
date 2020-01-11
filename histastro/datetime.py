@@ -42,13 +42,13 @@ def julianDay(year,month,day):
     
     year0 = year
     if month <= 2:  # Jan and Feb are month 13 and 14 of the previous year
-       year -= 1
-       month += 12
+        year -= 1
+        month += 12
        
     b = 0; a=0
     if year0 > 1582:     # Assume a Gregorian date
-       a = m.floor(year/100.0)
-       b = 2 - a + m.floor(a/4.0)
+        a = m.floor(year/100.0)
+        b = 2 - a + m.floor(a/4.0)
        
     jd = m.floor(365.25*(year+4716)) + m.floor(30.6001*(month+1)) + day + b - 1524.5
     
@@ -80,10 +80,10 @@ def jd2cal(jd):
     z = m.floor(jd+0.5)
     f = jd + 0.5 - z
     if(z < 2299161):   # Use the Julian calendar
-       a = z
+        a = z
     else:              # Use the Gregorian calendar
-       alpha = m.floor((z-1867216.25)/36524.25)
-       a = z + 1 + alpha - m.floor(alpha/4.)
+        alpha = m.floor((z-1867216.25)/36524.25)
+        a = z + 1 + alpha - m.floor(alpha/4.)
     
     b = a + 1524
     c = m.floor((b - 122.1)/365.25)
@@ -92,14 +92,14 @@ def jd2cal(jd):
     day = b - d - m.floor(30.6001*e) + f
     
     if(e < 14):
-       month = int(e - 1)
+        month = int(e - 1)
     else:
-       month = int(e - 13)
+        month = int(e - 13)
        
     if(month > 2):
-       year = int(c - 4716)
+        year = int(c - 4716)
     else:
-       year = int(c - 4715)
+        year = int(c - 4715)
        
     return year,month,day
 
