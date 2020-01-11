@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = u'HistAstro'
-copyright = u'2019, Marc van der Sluys'
+copyright = u'2019-2020, Marc van der Sluys'
 author = u'Marc van der Sluys'
 
 # The short X.Y version
