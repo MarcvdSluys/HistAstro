@@ -141,6 +141,7 @@ def jd2tjc(jd):
     return (jd - 2451545.0)/36525
 
 
+
 def jd2tjm(jd):
     """
     Compute the time in Julian millennia since 2000.0.
@@ -154,6 +155,7 @@ def jd2tjm(jd):
     """
     
     return (jd - 2451545.0)/365250
+
 
 
 def gmst(jd):
@@ -181,6 +183,7 @@ def gmst(jd):
     return gmst % pi2
 
 
+
 def DeltaT1820(jd):
     """
     Return a rough estimate for the value of Delta T.
@@ -199,8 +202,8 @@ def DeltaT1820(jd):
     
     """
     
-    # return 12 + 0.5 * 1.8e-3/86400/(36525*86400) * ((jd-jd1820)*86400)**2
-    return 12 + 0.5 * 1.8e-3 / 36525 * (jd-jd1820)**2  # simplified
+    # return 12 + 0.5 * 1.8e-3/86400/(36525*86400) * ((jd-jd1820)*86400)**2  # Comprehensible notation
+    return 12 + 0.5 * 1.8e-3 / 36525 * (jd-jd1820)**2                        # Simplified notation
 
 
 
