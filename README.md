@@ -21,7 +21,7 @@ http://astro.ru.nl/~sluys/HistAstro/
 
 ## HistAstro pages ##
 
-* [Radboud University](http://astro.ru.nl/~sluys/HistAstro/): HistAstro homepage, data files
+* [Radboud University](http://astro.ru.nl/~sluys/HistAstro/): HistAstro homepage: data files and code documentation
 * [Pypi](https://pypi.org/project/histastro/): HistAstro Python package
 * [GitHub](https://github.com/MarcvdSluys/HistAstro): HistAstro source code
 
