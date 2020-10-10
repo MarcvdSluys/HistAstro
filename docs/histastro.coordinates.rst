@@ -2,6 +2,6 @@ histastro.coordinates module
 ============================
 
 .. automodule:: histastro.coordinates
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

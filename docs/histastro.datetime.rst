@@ -2,6 +2,6 @@ histastro.datetime module
 =========================
 
 .. automodule:: histastro.datetime
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

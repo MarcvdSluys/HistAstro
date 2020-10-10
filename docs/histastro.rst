@@ -17,6 +17,6 @@ Module contents
 ---------------
 
 .. automodule:: histastro
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
