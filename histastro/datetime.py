@@ -17,12 +17,11 @@
 
 
 # Modules:
-import math as m
 import numpy as np
 from histastro.constants import pi2, jd1820,jd2000
 
 
-def julianDay(year,month,day):
+def julianDay(year,month,day, julian=None):
     """Compute the Julian Day for a given year, month and day.
     
     Notes:
@@ -31,32 +30,39 @@ def julianDay(year,month,day):
         noon on the first day of the month.
     
     Args:
-      year (int):    Year CE (UT).  Note that year=0 = 1 BCE.
-      month (int):   Month number of year (UT; 1-12).
-      day (double):  Day of month with fraction (UT; 1.0-31.999).
+      year (int):     Year CE (UT).  Note that year=0 = 1 BCE.
+      month (int):    Month number of year (UT; 1-12).
+      day (double):   Day of month with fraction (UT; 1.0-31.999).
+      julian (bool):  Force Julian (True) or Gregorian calendar (False).  Default: None: Julian before 1583, else Gregorian.
     
     Returns:
       double:  jd: Julian day (days).
-
+      
     """
     
-    year0 = year
+    # Determine whether Julian or Gregorian calendar should be used:
+    if julian is None:     # Determine from date
+        gregorian = True                    # Assume a Gregorian date by default
+        if year < 1583:  gregorian = False  # Assume a Julian date before 1583
+    else:                  # Use as specified in interface
+        gregorian = not julian
+        
     if month <= 2:  # Jan and Feb are month 13 and 14 of the previous year
-        year -= 1
+        year  -=  1
         month += 12
        
-    b = 0; a=0
-    if year0 > 1582:     # Assume a Gregorian date
-        a = m.floor(year/100.0)
-        b = 2 - a + m.floor(a/4.0)
-       
-    jd = m.floor(365.25*(year+4716)) + m.floor(30.6001*(month+1)) + day + b - 1524.5
+    a=0; b=0
+    if gregorian:  # If this is a Gregorian date:
+        a = np.floor(year/100.0)
+        b = 2 - a + np.floor(a/4.0)
+        
+    jd = np.floor(365.25*(year+4716)) + np.floor(30.6001*(month+1)) + day + b - 1524.5
     
     return jd
 
 
 
-def jd2cal(jd):
+def jd2cal(jd, julian=None):
     """
     Compute the calendar date from a given Julian Day.
     
@@ -66,7 +72,8 @@ def jd2cal(jd):
         noon on the first day of the month.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (double):    Julian day (days).
+      julian (bool):  Force Julian (True) or Gregorian calendar (False).  Default: None: Julian before 1583, else Gregorian.
     
     Returns:
       tuple (int,int,double):  Tuple containing (year, month, day):
@@ -77,26 +84,34 @@ def jd2cal(jd):
 
     """
     
-    z = m.floor(jd+0.5)
+    z = np.floor(jd+0.5)
     f = jd + 0.5 - z
-    if(z < 2299161):   # Use the Julian calendar
+    
+    # Determine whether Julian or Gregorian calendar should be used:
+    if julian is None:     # Determine from date
+        gregorian = True                    # Assume a Gregorian date by default
+        if z < 2299161:  gregorian = False  # Assume a Julian date before 1582-10-16
+    else:                  # Use as specified in interface
+        gregorian = not julian
+    
+    if gregorian:      # Use the Gregorian calendar
+        alpha = np.floor((z-1867216.25)/36524.25)
+        a = z + 1 + alpha - np.floor(alpha/4.)
+    else:              # Use the Julian calendar
         a = z
-    else:              # Use the Gregorian calendar
-        alpha = m.floor((z-1867216.25)/36524.25)
-        a = z + 1 + alpha - m.floor(alpha/4.)
     
     b = a + 1524
-    c = m.floor((b - 122.1)/365.25)
-    d = m.floor(365.25*c)
-    e = m.floor((b-d)/30.6001)
-    day = b - d - m.floor(30.6001*e) + f
+    c = np.floor((b - 122.1)/365.25)
+    d = np.floor(365.25*c)
+    e = np.floor((b-d)/30.6001)
+    day = b - d - np.floor(30.6001*e) + f
     
-    if(e < 14):
+    if e < 14:
         month = int(e - 1)
     else:
         month = int(e - 13)
        
-    if(month > 2):
+    if month > 2:
         year = int(c - 4716)
     else:
         year = int(c - 4715)
@@ -233,15 +248,34 @@ def DeltaT(jd):
     
     year = jd2year(jd)  # Year with fraction for jd of interest
     
-    if(year < years[0]):     # Before -700
+    if year < years[0]:     # Before -700:
         jd0 = julianDay(years[0], 1, 1)
         return DeltaT1820(jd) - DeltaT1820(jd0) + DTvalues[0]
     
-    elif(year > years[-1]):  # in the future
+    elif year > years[-1]:  # In the future (after the last date listed):
         jd1 = julianDay(years[-1], 1, 1)
         return DeltaT1820(jd) - DeltaT1820(jd1) + DTvalues[-1]
     
-    else:                    # linear interpolation from known data
+    else:                   # Linear interpolation from known data:
         return np.interp(year, years, DTvalues)
+    
 
-
+# Test code:
+if __name__ == "__main__":
+    print("JD for 1,1,1:              ", julianDay(1,1,1))
+    print("JD for 1580,1,1:           ", julianDay(1580,1,1))
+    print("JD for 1582,12,31:         ", julianDay(1582,12,31))
+    print("JD for 1583,1,1:           ", julianDay(1583,1,1))
+    print("JD for 1590,1,1:           ", julianDay(1590,1,1))
+    print("JD for 2000,1,1:           ", julianDay(2000,1,1))
+    print("JD for 2000,1,1 (Julian):  ", julianDay(2000,1,1, julian=True))
+    print()
+    print("Date for JD=1721423.5:           ", jd2cal(1721423.5))
+    print("Date for JD=2298152.5:           ", jd2cal(2298152.5))
+    print("Date for JD=2299160.0:           ", jd2cal(2299160.0))
+    print("Date for JD=2299161.0:           ", jd2cal(2299161.0))
+    print("Date for JD=2299238.5:           ", jd2cal(2299238.5))
+    print("Date for JD=2299247.5:           ", jd2cal(2299247.5))
+    print("Date for JD=2301795.5:           ", jd2cal(2301795.5))
+    print("Date for JD=2451544.5:           ", jd2cal(2451544.5))
+    print("Date for JD=2451544.5 (Julian):  ", jd2cal(2451544.5, julian=True))
