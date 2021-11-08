@@ -29,10 +29,10 @@ def obliquity(jd):
     Compute the obliquity of the ecliptic in radians from the JD(E).
     
     Arguments:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  eps: Obliquity of the ecliptic (rad).
+      float:  eps: Obliquity of the ecliptic (rad).
     
     References:
       - Seidelman 1992, Eq. 3.222-1.
@@ -50,15 +50,15 @@ def eq2ecl(ra,dec, eps):
     Convert equatorial coordinates to ecliptical.
 
     Arguments:
-      ra (double):   Right ascension (rad).
-      dec (double):  Declination (rad).
-      eps (double):  Obliquity of the ecliptic (rad).
+      ra (float):   Right ascension (rad).
+      dec (float):  Declination (rad).
+      eps (float):  Obliquity of the ecliptic (rad).
     
     Returns:
-      tuple (double,double): tuple containing (lon, lat):
+      tuple (float,float): tuple containing (lon, lat):
     
-        - lon (double):  Ecliptical longitude (rad).
-        - lat (double):  Ecliptical latitude (rad).
+        - lon (float):  Ecliptical longitude (rad).
+        - lat (float):  Ecliptical latitude (rad).
     
     """
     
@@ -72,15 +72,15 @@ def ecl2eq(lon,lat, eps):
     """Convert (geocentric) spherical ecliptical coordinates to spherical equatorial coordinates.
     
     Arguments:
-      lon (double):  Ecliptical longitude (rad).
-      lat (double):  Ecliptical latitude (rad).
-      eps (double):  Obliquity of the ecliptic (rad).
+      lon (float):  Ecliptical longitude (rad).
+      lat (float):  Ecliptical latitude (rad).
+      eps (float):  Obliquity of the ecliptic (rad).
     
     Returns:
-      tuple (double,double): tuple containing (ra, dec):
+      tuple (float,float): tuple containing (ra, dec):
     
-        - ra (double):   Right ascension (rad).
-        - dec (double):  Declination (rad).
+        - ra (float):   Right ascension (rad).
+        - dec (float):  Declination (rad).
     
     References:
       - [Explanatory Supplement to the Astronomical Almanac 3rd Ed,
@@ -98,15 +98,15 @@ def par2horiz(ha,dec, phi):
     """Convert parallactic coordinates to horizontal.
 
     Arguments:
-      ha (double):   Hour angle (rad).
-      dec (double):  Declination (rad).
-      phi (double):  Geographical latitude (rad, N>0).
+      ha (float):   Hour angle (rad).
+      dec (float):  Declination (rad).
+      phi (float):  Geographical latitude (rad, N>0).
     
     Returns:
-      tuple (double,double): tuple containing (az, alt):
+      tuple (float,float): tuple containing (az, alt):
     
-        - az (double):   Azimuth (rad, S=0).
-        - alt (double):  Altitude (rad).
+        - az (float):   Azimuth (rad, S=0).
+        - alt (float):  Altitude (rad).
     
     """
     
@@ -120,20 +120,20 @@ def properMotion(startJD,targetJD, ra,dec, pma,pmd):
     """Compute the proper motion from startJD to targetJD for the given positions and proper motions.
     
     Arguments:
-      startJD (double):   Julian day of the initial epoch (days).
-      targetJD (double):  Julian day of the target epoch (days).
+      startJD (float):   Julian day of the initial epoch (days).
+      targetJD (float):  Julian day of the target epoch (days).
     
-      ra (double):        Right ascension (numpy array, rad).
-      dec (double):       Declination (numpy array, rad).
+      ra (float):        Right ascension (numpy array, rad).
+      dec (float):       Declination (numpy array, rad).
     
-      pma (double):       Proper motion in right ascension (numpy array, rad/yr).
-      pmd (double):       Proper motion in declination (numpy array, rad/yr).
+      pma (float):       Proper motion in right ascension (numpy array, rad/yr).
+      pmd (float):       Proper motion in declination (numpy array, rad/yr).
 
     Returns:
-      tuple (double,double): tuple containing (raTarget, decTarget):
+      tuple (float,float): tuple containing (raTarget, decTarget):
     
-        - raTarget (double):   Right ascension for the target epoch (rad).
-        - decTarget (double):  Declination for the target epoch (rad).
+        - raTarget (float):   Right ascension for the target epoch (rad).
+        - decTarget (float):  Declination for the target epoch (rad).
 
     """
     
@@ -148,15 +148,15 @@ def precessHip(jd, ra,dec):
     """Compute precession in equatorial coordinates from the Hipparcos equinox (J2000) to that of the specified JD.
     
     Arguments:
-      jd (double):   Julian day (days).
-      ra (double):   Right ascension (rad).
-      dec (double):  Declination (rad).
+      jd (float):   Julian day (days).
+      ra (float):   Right ascension (rad).
+      dec (float):  Declination (rad).
     
     Returns:
-      tuple (double,double): tuple containing (raTarget, decTarget):
+      tuple (float,float): tuple containing (raTarget, decTarget):
     
-        - raNew (double):   Right ascension for the target equinox (rad).
-        - decNew (double):  Declination for the target equinox (rad).
+        - raNew (float):   Right ascension for the target equinox (rad).
+        - decNew (float):  Declination for the target equinox (rad).
     
     """
     
@@ -178,25 +178,25 @@ def geoc2topoc_ecl(gcLon,gcLat, gcDist,gcRad, eps,lst, obsLat,obsEle=0, debug=Fa
     """Convert spherical ecliptical coordinates from the geocentric to the topocentric system.
     
     Arguments:
-      gcLon (double):   Geocentric ecliptic longitude (rad).
-      gcLat (double):   Geocentric ecliptic latitude (rad).
-      gcDist (double):  Geocentric distance (AU).
-      gcRad (double):   Geocentric semi-diameter (rad).
+      gcLon (float):   Geocentric ecliptic longitude (rad).
+      gcLat (float):   Geocentric ecliptic latitude (rad).
+      gcDist (float):  Geocentric distance (AU).
+      gcRad (float):   Geocentric semi-diameter (rad).
       
-      eps (double):     Obliquity of the ecliptic (rad).
-      lst (double):     Local sidereal time (rad).
+      eps (float):     Obliquity of the ecliptic (rad).
+      lst (float):     Local sidereal time (rad).
       
-      obsLat (double):  Geographical latitude of the observer (rad).
-      obsEle (double):  Altitude/elevation of the observer above sea level (metres, optional, default value = 0).
+      obsLat (float):  Geographical latitude of the observer (rad).
+      obsEle (float):  Altitude/elevation of the observer above sea level (metres, optional, default value = 0).
       
-      debug (double):   Print debug output (True/False, optional, default value = True).
+      debug (float):   Print debug output (True/False, optional, default value = True).
     
     Returns:
-      tuple (double,double,double): tuple containing (tcLon, tcLat, tcRad):
+      tuple (float,float,float): tuple containing (tcLon, tcLat, tcRad):
     
-        - tcLon (double):  Topocentric ecliptic longitude (rad).
-        - tcLat (double):  Topocentric ecliptic latitude (rad).
-        - tcRad (double):  Topocentric semi-diameter (rad).
+        - tcLon (float):  Topocentric ecliptic longitude (rad).
+        - tcLat (float):  Topocentric ecliptic latitude (rad).
+        - tcRad (float):  Topocentric semi-diameter (rad).
     
     """
     

@@ -32,11 +32,11 @@ def julianDay(year,month,day, julian=None):
     Args:
       year (int):     Year CE (UT).  Note that year=0 = 1 BCE.
       month (int):    Month number of year (UT; 1-12).
-      day (double):   Day of month with fraction (UT; 1.0-31.999).
+      day (float):    Day of month with fraction (UT; 1.0-31.999).
       julian (bool):  Force Julian (True) or Gregorian calendar (False).  Default: None: Julian before 1583, else Gregorian.
     
     Returns:
-      double:  jd: Julian day (days).
+      float:  jd: Julian day (days).
       
     """
     
@@ -51,11 +51,12 @@ def julianDay(year,month,day, julian=None):
         year  -=  1
         month += 12
        
-    a=0; b=0
     if gregorian:  # If this is a Gregorian date:
         a = np.floor(year/100.0)
         b = 2 - a + np.floor(a/4.0)
-        
+    else:          # For Julian date
+        b=0
+    
     jd = np.floor(365.25*(year+4716)) + np.floor(30.6001*(month+1)) + day + b - 1524.5
     
     return jd
@@ -72,15 +73,15 @@ def jd2cal(jd, julian=None):
         noon on the first day of the month.
     
     Args:
-      jd (double):    Julian day (days).
+      jd (float):     Julian day (days).
       julian (bool):  Force Julian (True) or Gregorian calendar (False).  Default: None: Julian before 1583, else Gregorian.
     
     Returns:
-      tuple (int,int,double):  Tuple containing (year, month, day):
+      tuple (int,int,float):  Tuple containing (year, month, day):
     
-        - year (int):    Year CE (UT).  Note that year=0 indicates 1 BCE.
-        - month (int):   Month number of year (UT; 1-12).
-        - day (double):  Day of month with fraction (UT; 1.0-31.999).
+        - year (int):   Year CE (UT).  Note that year=0 indicates 1 BCE.
+        - month (int):  Month number of year (UT; 1-12).
+        - day (float):  Day of month with fraction (UT; 1.0-31.999).
 
     """
     
@@ -104,7 +105,7 @@ def jd2cal(jd, julian=None):
     c = np.floor((b - 122.1)/365.25)
     d = np.floor(365.25*c)
     e = np.floor((b-d)/30.6001)
-    day = b - d - np.floor(30.6001*e) + f
+    day = b - d - np.floor(30.6001*e) + f  # Day of month with fraction
     
     if e < 14:
         month = int(e - 1)
@@ -125,10 +126,10 @@ def jd2year(jd):
     Compute a year with fraction from a given Julian Day.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  Year CE, with decimals.  Note that year=0 indicates 1 BCE.
+      float:  Year CE, with decimals.  Note that year=0 indicates 1 BCE.
     
     """
     
@@ -146,10 +147,10 @@ def jd2tjc(jd):
     Compute the time in Julian centuries since 2000.0.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  tjc: Time in Julian centuries since 2000.0 (UT).
+      float:  tjc: Time in Julian centuries since 2000.0 (UT).
     
     """
     
@@ -162,10 +163,10 @@ def jd2tjm(jd):
     Compute the time in Julian millennia since 2000.0.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  tjm: Time in Julian millennia since 2000.0 (UT).
+      float:  tjm: Time in Julian millennia since 2000.0 (UT).
     
     """
     
@@ -178,10 +179,10 @@ def gmst(jd):
     Calculate Greenwich Mean Sidereal Time for any instant, in radians.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  gmst: Greenwich mean sidereal time (rad).
+      float:  gmst: Greenwich mean sidereal time (rad).
     
     References:
       - Explanatory Supplement to the Astronomical Almanac, 3rd ed, Eq. 6.66 (2012).
@@ -207,10 +208,10 @@ def DeltaT1820(jd):
     DeltaT=12s in 1820.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  Delta T (s).
+      float:  Delta T (s).
     
     References:
       - [Extrapolation of Delta T](http://hemel.waarnemen.com/Computing/deltat.html).
@@ -230,10 +231,10 @@ def DeltaT(jd):
       minimum of the parabola is DeltaT=12s in 1820.
     
     Args:
-      jd (double):  Julian day (days).
+      jd (float):  Julian day (days).
     
     Returns:
-      double:  Delta T (s).
+      float:  Delta T (s).
     
     References:
       - [International Earth Rotation and Reference Systems Service](ftp://maia.usno.navy.mil/ser7/deltat.data) of the U.S. Naval Observatory.

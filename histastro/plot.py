@@ -21,12 +21,12 @@ def mag2size(Mlim, mag, scale=1):
     Convert magnitudes (mag) to disc area ('size') for plotting with pyplot.scatter(), given a magnitude limit Mlim.
     
     Args:
-      Mlim (double):   Magnitude limit.
-      mag (double):    Magnitude (Numpy array).
-      scale (double):  Scale factor (default value = 1).
+      Mlim (float):   Magnitude limit.
+      mag (float):    Magnitude (Numpy array).
+      scale (float):  Scale factor (default value = 1).
     
     Returns:
-      double:  Area sizes for the stellar discs (Numpy array)
+      float:  Area sizes for the stellar discs (Numpy array)
     
     """
     

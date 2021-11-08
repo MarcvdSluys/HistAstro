@@ -32,9 +32,9 @@ def readData(inFile='data/moonposMeeus.csv'):
       value = 'data/moonposMeeus.csv'.
 
     Returns:
-      tuple (double,double):  Tuple containing (lrTerms, bTerms):
+      tuple (float,float):  Tuple containing (lrTerms, bTerms):
 
-        - lrTerms (double): Numpy array containing six columns with periodic terms for longitude and distance.
+        - lrTerms (float): Numpy array containing six columns with periodic terms for longitude and distance.
           The first four columns contain arguments for both variables, the last two the coefficients for
           longitude and distance:
     
@@ -45,7 +45,7 @@ def readData(inFile='data/moonposMeeus.csv'):
           - 5 Coefficient of the sine of the argument, for the longitude (rad).
           - 6 Coefficient of the cosine of the argument, for the distance (km).
     
-        - bTerms (double): Numpy array containing five columns periodic terms for latitude.  The first four
+        - bTerms (float): Numpy array containing five columns periodic terms for latitude.  The first four
           columns contain arguments, the last contains the coefficients for latitude:
     
           - 1 (int): Multiplication factor for the mean elongation of the Moon.
@@ -70,18 +70,18 @@ def compute_lbr(jde, lrTerms,bTerms, debug=False):
     Compute the geocentric ecliptic coordinates of the Moon for the equinox of date for the given JDE.
     
     Args:
-      jde (double):      Julian Day in dynamical time, i.e., corrected for Delta T (days).
-      lrTerms (double):  Numpy array with ELP82 periodic terms for longitude and distance.
-      bTerms (double):   Numpy array with ELP82 periodic terms for latitude.
-      debug (bool):      Produce debug output.  Optional, default value = False.
+      jde (float):      Julian Day in dynamical time, i.e., corrected for Delta T (days).
+      lrTerms (float):  Numpy array with ELP82 periodic terms for longitude and distance.
+      bTerms (float):   Numpy array with ELP82 periodic terms for latitude.
+      debug (bool):     Produce debug output.  Optional, default value = False.
     
     Returns:
-      tuple (double,double,double,double):  Tuple containing (lon, lat, dist, diam):
+      tuple (float,float,float,float):  Tuple containing (lon, lat, dist, diam):
     
-        - lon (double):   Geocentric ecliptic longitude of the Moon (rad).
-        - lat (double):   Geocentric ecliptic longitude of the Moon (rad).
-        - dist (double):  Geocentric distance of the Moon (km).
-        - diam (double):  Geocentric apparent diameter of the Moon (rad).
+        - lon (float):   Geocentric ecliptic longitude of the Moon (rad).
+        - lat (float):   Geocentric ecliptic longitude of the Moon (rad).
+        - dist (float):  Geocentric distance of the Moon (km).
+        - diam (float):  Geocentric apparent diameter of the Moon (rad).
     
     Notes:
       - A reduced version of the ELP82 theory is used.

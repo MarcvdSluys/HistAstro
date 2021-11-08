@@ -31,12 +31,12 @@ def readVSOP(dataDir, pl):
       pl (int):       Planet ID: 1-8 = Mercury - Neptune.
     
     Returns:
-      tuple (double,double,double):  Tuple containing (lonTerms, latTerms, radTerms):
+      tuple (float,float,float):  Tuple containing (lonTerms, latTerms, radTerms):
     
-      - lonTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical
-                            longitude.
-      - latTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical latitude.
-      - radTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric distance.
+      - lonTerms (float):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical
+                           longitude.
+      - latTerms (float):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical latitude.
+      - radTerms (float):  Numpy array containing VSOP87D periodic terms for heliocentric distance.
     
     References:
       - [Bretagnon & Francou, A&A 202, 309 (1988)](https://ui.adsabs.harvard.edu/abs/1988A%26A...202..309B).
@@ -77,18 +77,18 @@ def computeLBR(jde, lonTerms,latTerms,radTerms):
     Compute the heliocentric ecliptical coordinates for a planet from its VSOP87D periodic terms.
     
     Args:
-      jde (double):       Julian Day in dynamical time, i.e., corrected for Delta T (days).
-      lonTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical
-                          longitude.
-      latTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical latitude.
-      radTerms (double):  Numpy array containing VSOP87D periodic terms for heliocentric distance.
+      jde (float):       Julian Day in dynamical time, i.e., corrected for Delta T (days).
+      lonTerms (float):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical
+                         longitude.
+      latTerms (float):  Numpy array containing VSOP87D periodic terms for heliocentric ecliptical latitude.
+      radTerms (float):  Numpy array containing VSOP87D periodic terms for heliocentric distance.
     
     Returns:
-      tuple (double,double,double):  Tuple containing (lon, lat, rad):
+      tuple (float,float,float):  Tuple containing (lon, lat, rad):
       
-        - lon (double):  Heliocentric ecliptical longitude (rad).
-        - lat (double):  Heliocentric ecliptical latitude (rad).
-        - rad (double):  Heliocentric distance (km).
+        - lon (float):  Heliocentric ecliptical longitude (rad).
+        - lat (float):  Heliocentric ecliptical latitude (rad).
+        - rad (float):  Heliocentric distance (km).
     
     References:
       - [Bretagnon & Francou, A&A 202, 309 (1988)](https://ui.adsabs.harvard.edu/abs/1988A%26A...202..309B).
@@ -120,20 +120,20 @@ def hc2gc(l0,b0,r0, l,b,r):
     Convert the heliocentric spherical coordinates of an object to geocentric spherical coordinates.
     
     Args:
-      l0 (double):  Heliocentric ecliptical longitude of the Earth (rad).
-      b0 (double):  Heliocentric ecliptical latitude of the Earth (rad).
-      r0 (double):  Heliocentric ecliptical distance of the Earth (km).
+      l0 (float):  Heliocentric ecliptical longitude of the Earth (rad).
+      b0 (float):  Heliocentric ecliptical latitude of the Earth (rad).
+      r0 (float):  Heliocentric ecliptical distance of the Earth (km).
     
-      l (double):   Heliocentric ecliptical longitude of the other object (rad).
-      b (double):   Heliocentric ecliptical latitude of the other object (rad).
-      r (double):   Heliocentric ecliptical distance of the other object (km).
+      l (float):   Heliocentric ecliptical longitude of the other object (rad).
+      b (float):   Heliocentric ecliptical latitude of the other object (rad).
+      r (float):   Heliocentric ecliptical distance of the other object (km).
     
     Returns:
-      tuple (double,double,double):  Tuple containing (lon, lat, rad):
+      tuple (float,float,float):  Tuple containing (lon, lat, rad):
       
-        - lon (double):  Geocentric ecliptical longitude (rad).
-        - lat (double):  Geocentric ecliptical latitude (rad).
-        - rad (double):  Geocentric distance (km).
+        - lon (float):  Geocentric ecliptical longitude (rad).
+        - lat (float):  Geocentric ecliptical latitude (rad).
+        - rad (float):  Geocentric distance (km).
     
     Note:
       - The heliocentric spherical coordinates of the Earth and the other object are first converted to
@@ -172,20 +172,20 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
     Convert the heliocentric rectangular coordinates of an object to geocentric spherical coordinates.
     
     Args:
-      x0 (double):  Heliocentric ecliptical x-coordinate of the Earth.
-      y0 (double):  Heliocentric ecliptical y-coordinate of the Earth.
-      z0 (double):  Heliocentric ecliptical z-coordinate of the Earth.
+      x0 (float):  Heliocentric ecliptical x-coordinate of the Earth.
+      y0 (float):  Heliocentric ecliptical y-coordinate of the Earth.
+      z0 (float):  Heliocentric ecliptical z-coordinate of the Earth.
     
-      x (double):   Heliocentric ecliptical x-coordinate of the other object.
-      y (double):   Heliocentric ecliptical y-coordinate of the other object.
-      z (double):   Heliocentric ecliptical z-coordinate of the other object.
+      x (float):   Heliocentric ecliptical x-coordinate of the other object.
+      y (float):   Heliocentric ecliptical y-coordinate of the other object.
+      z (float):   Heliocentric ecliptical z-coordinate of the other object.
     
     Returns:
-      tuple (double,double,double):  Tuple containing (lon, lat, rad):
+      tuple (float,float,float):  Tuple containing (lon, lat, rad):
       
-        - lon (double):  Geocentric ecliptical longitude (rad).
-        - lat (double):  Geocentric ecliptical latitude (rad).
-        - rad (double):  Geocentric distance (km).
+        - lon (float):  Geocentric ecliptical longitude (rad).
+        - lat (float):  Geocentric ecliptical latitude (rad).
+        - rad (float):  Geocentric distance (km).
     
     Note:
       - The distance units of the arguments must all be the same.
@@ -226,7 +226,7 @@ def magnPlanet(pl, distPS, distPE, distSE):
       distSE:     Heliocentric distance of the Earth (AU).
     
     Returns:
-      double:  Apparent visual magnitude of the planet.
+      float:  Apparent visual magnitude of the planet.
     
     References:
       - [Explanatory Supplement to the Astronomical Almanac 3rd Ed, Table 10.6, p.413 +
@@ -255,12 +255,12 @@ def magnSatRing(JD, lon,lat):
     """Compute the apparent visual magnitude of Saturn's rings.
     
     Args:
-      JD (double):   Julian Day (days).
-      lon (double):  Geocentric ecliptical longitude of Saturn (rad).
-      lat (double):  Geocentric ecliptical latitude of Saturn (rad).
+      JD (float):   Julian Day (days).
+      lon (float):  Geocentric ecliptical longitude of Saturn (rad).
+      lat (float):  Geocentric ecliptical latitude of Saturn (rad).
     
     Returns:
-      double:  magnSatRing: Apparent visual magnitude of the planet.
+      float:  magnSatRing: Apparent visual magnitude of the planet.
     
     References:
       - [Explanatory Supplement to the Astronomical Almanac 3rd Ed, Table 10.6, p.413 +
