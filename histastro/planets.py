@@ -115,18 +115,18 @@ def computeLBR(jde, lonTerms,latTerms,radTerms):
 
 
 
-def hc2gc(l0,b0,r0, l,b,r):
+def hc2gc(le,be,re, lp,bp,rp):
     """
     Convert the heliocentric spherical coordinates of an object to geocentric spherical coordinates.
     
     Args:
-      l0 (float):  Heliocentric ecliptical longitude of the Earth (rad).
-      b0 (float):  Heliocentric ecliptical latitude of the Earth (rad).
-      r0 (float):  Heliocentric ecliptical distance of the Earth (km).
+      le (float):  Heliocentric ecliptical longitude of the Earth (rad).
+      be (float):  Heliocentric ecliptical latitude of the Earth (rad).
+      re (float):  Heliocentric ecliptical distance of the Earth (km).
     
-      l (float):   Heliocentric ecliptical longitude of the other object (rad).
-      b (float):   Heliocentric ecliptical latitude of the other object (rad).
-      r (float):   Heliocentric ecliptical distance of the other object (km).
+      lp (float):  Heliocentric ecliptical longitude of the other object (rad).
+      bp (float):  Heliocentric ecliptical latitude of the other object (rad).
+      rp (float):  Heliocentric ecliptical distance of the other object (km).
     
     Returns:
       tuple (float,float,float):  Tuple containing (lon, lat, rad):
@@ -146,12 +146,12 @@ def hc2gc(l0,b0,r0, l,b,r):
     
     """
     
-    x = r * m.cos(b) * m.cos(l)  -  r0 * m.cos(b0) * m.cos(l0)
-    y = r * m.cos(b) * m.sin(l)  -  r0 * m.cos(b0) * m.sin(l0)
-    z = r * m.sin(b)             -  r0 * m.sin(b0)
+    x = rp * m.cos(bp) * m.cos(lp)  -  re * m.cos(be) * m.cos(le)
+    y = rp * m.cos(bp) * m.sin(lp)  -  re * m.cos(be) * m.sin(le)
+    z = rp * m.sin(bp)              -  re * m.sin(be)
     
     # Convert geocentric rectangular to geocentric spherical coordinates:
-    if x==0 and y==0 and z==0:
+    if (x==0) and (y==0) and (z==0):
         lon = 0.0
         lat = 0.0
         rad = 0.0
@@ -200,7 +200,7 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
     dz = z - z0
     
     # Convert geocentric rectangular to spherical coordinates:
-    if dx==0 and dy==0 and dz==0:
+    if (dx==0) and (dy==0) and (dz==0):
         lon = 0.0
         lat = 0.0
         rad = 0.0
@@ -242,7 +242,7 @@ def magnPlanet(pl, distPS, distPE, distSE):
     
     phAng = np.degrees( np.arccos( (distPS**2 + distPE**2 - distSE**2) / (2*distPS*distPE) ) )  # Phase angle (deg!)
     
-    if(pl==2 and phAng>163.6): pl = 3  # Venus 2
+    if (pl==2) and (phAng>163.6): pl = 3  # Venus 2
     pl = pl-1  # 1-9 -> 0-8
     
     mag = 5*np.log10(distPS*distPE) + a0[pl] + a1[pl]*phAng + a2[pl]*phAng**2 + a3[pl]*phAng**3
