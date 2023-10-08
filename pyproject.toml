@@ -7,7 +7,7 @@ py-modules = []
 
 [project]
 name = "histastro"
-version = "0.0.4"
+version = "0.0.5"
 authors = [ { name="Marc van der Sluys", email="git@vandersluys.nl" } ]
 description = "A Python package for historical-astronomy calculations of Sun, Moon and planets"
 readme   = "README.md"
