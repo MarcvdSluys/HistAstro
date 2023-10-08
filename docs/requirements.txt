@@ -1,0 +1,4 @@
+histastro
+fortranformat==1.0.1
+numpy
+sphinx-rtd-theme
