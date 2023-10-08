@@ -167,18 +167,18 @@ def hc2gc(le,be,re, lp,bp,rp):
 
 
 
-def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
+def xyz_hc2lbr_gc(xe,ye,ze, xp,yp,zp):
     """
     Convert the heliocentric rectangular coordinates of an object to geocentric spherical coordinates.
     
     Args:
-      x0 (float):  Heliocentric ecliptical x-coordinate of the Earth.
-      y0 (float):  Heliocentric ecliptical y-coordinate of the Earth.
-      z0 (float):  Heliocentric ecliptical z-coordinate of the Earth.
+      xe (float):  Heliocentric ecliptical x-coordinate of the Earth.
+      ye (float):  Heliocentric ecliptical y-coordinate of the Earth.
+      ze (float):  Heliocentric ecliptical z-coordinate of the Earth.
     
-      x (float):   Heliocentric ecliptical x-coordinate of the other object.
-      y (float):   Heliocentric ecliptical y-coordinate of the other object.
-      z (float):   Heliocentric ecliptical z-coordinate of the other object.
+      xp (float):  Heliocentric ecliptical x-coordinate of the other object.
+      yp (float):  Heliocentric ecliptical y-coordinate of the other object.
+      zp (float):  Heliocentric ecliptical z-coordinate of the other object.
     
     Returns:
       tuple (float,float,float):  Tuple containing (lon, lat, rad):
@@ -195,9 +195,9 @@ def xyz_hc2lbr_gc(x0,y0,z0, x,y,z):
     
     """
     
-    dx = x - x0
-    dy = y - y0
-    dz = z - z0
+    dx = xp - xe
+    dy = yp - ye
+    dz = zp - ze
     
     # Convert geocentric rectangular to spherical coordinates:
     if (dx==0) and (dy==0) and (dz==0):
